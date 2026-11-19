@@ -41,7 +41,7 @@ Ejecutarlo localmente no significa que tu cliente AI esté desconectado: puede e
 - [Pruebas y límites de la evidencia](docs/TESTING.md)
 - [Seguridad y comunicación de problemas](SECURITY.md)
 
-El repositorio está pensado para cualquier usuario, sin configuración personal de su autor. Si contiene experimentos provider_normalize.py/provider_pager.py, siguen separados del MCP, sin transporte HTTP ni banco real.
+El repositorio está pensado para cualquier usuario, sin configuración personal de su autor. Si contiene experimentos provider_normalize.py/provider_pager.py, siguen separados del MCP y sin banco real. Existe una biblioteca HTTP experimental aislada, no una conexión bancaria operativa.
 
 ## Licencia
 
