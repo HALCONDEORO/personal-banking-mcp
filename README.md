@@ -5,7 +5,7 @@
 [![Fixture checks](https://github.com/HALCONDEORO/personal-banking-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/HALCONDEORO/personal-banking-mcp/actions/workflows/ci.yml)
 [![Node suite](https://github.com/HALCONDEORO/personal-banking-mcp/actions/workflows/node-suite.yml/badge.svg)](https://github.com/HALCONDEORO/personal-banking-mcp/actions/workflows/node-suite.yml)
 
-**Understand the shape of your finances before connecting a bank.** A local, read-only [Model Context Protocol](https://modelcontextprotocol.io/) server with invented accounts, exact decimal amounts and explainable transaction analysis.
+**Understand the shape of your finances before connecting a bank.** A local, read-only [Model Context Protocol](https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro) server with invented accounts, exact decimal amounts and explainable transaction analysis.
 
 **Synthetic-data prototype. No bank connection.** The current MCP server cannot connect to Revolut or any other bank, move money or change an account. The Enable Banking adapter work is experimental and disconnected from MCP. This is not a current-balance service or financial advice.
 
