@@ -9,7 +9,7 @@ The experiment signs a short-lived application JWT and constrains read requests 
 ## Limits before any real use
 
 - Diagnostic suppression attaches filters to logging handlers globally. This is an explicit process-wide policy, not isolated per-client protection. Handlers added or reconfigured later must be addressed again. It is not proof that all application logs are safe.
-- There is no aggregate request budget, rate-limit controller or total cross-call deadline. Per-request limits do not provide those controls.
+- Each adapter call now has a cooperative total deadline, default 5 seconds, including streaming reads. This is not a rate policy or a multi-call request budget; no total cross-call deadline is implemented. Blocking code or cancellation-suppressing cleanup still cannot be given a hard process-level time bound by this coroutine timeout.
 - A cooperative coroutine deadline cannot provide a hard process-level bound when code blocks or suppresses cancellation.
 - Consent, authorized account binding, private key storage, safe callback setup, retention and deletion require their own design and verification. This module does not implement a full connection flow.
 - Unit tests with mocks establish regression behavior only. They do not establish live compatibility, bank availability, provider acceptance or production security.

@@ -4,6 +4,7 @@ Tests use httpx.MockTransport only. Application setup and consent are outside th
 module. No payments, POST, arbitrary URLs, proxy environment, redirects or retries.
 """
 import logging
+import asyncio
 import re
 import time
 from uuid import UUID
@@ -69,13 +70,16 @@ class ReadOnlyHTTP:
     constructs this object. A real use still requires user authority and review.
     """
     def __init__(self, token: Callable[[], str], *, accounts: frozenset[str],
-                 session: str, max_bytes: int = 256_000,
+                 session: str, max_bytes: int = 256_000, total_seconds: float = 5.0,
                  _test_transport: httpx.AsyncBaseTransport | None = None):
         if type(max_bytes) is not int or not 1 <= max_bytes <= 1_000_000:
             raise ValueError('Invalid byte limit')
         ids = list(accounts) + [session] if isinstance(accounts, frozenset) else []
         if not ids or any(not isinstance(v,str) or str(UUID(v)) != v for v in ids):
             raise ValueError('Invalid authorization scope')
+        if type(total_seconds) not in {int,float} or not 0 < total_seconds <= 5:
+            raise ValueError('Invalid total time limit')
+        self._total_seconds = total_seconds
         self._token, self._accounts, self._session = token, accounts, session
         self._max_bytes, self._transport = max_bytes, _test_transport
         suppress_provider_diagnostics()
@@ -119,8 +123,24 @@ class ReadOnlyHTTP:
 
     async def __call__(self, request: ReadRequest) -> FakeResponse:
         self._validate(request)
+        deadline = time.monotonic() + self._total_seconds
+        try:
+            result = await asyncio.wait_for(self._read(request, deadline), timeout=self._total_seconds)
+        except asyncio.TimeoutError:
+            raise FetchStopped('time_budget') from None
+        # A transport or cleanup routine can suppress cancellation. Never accept
+        # a late success just because wait_for eventually returned a value.
+        if time.monotonic() >= deadline:
+            raise FetchStopped('time_budget')
+        return result
+
+    async def _read(self, request: ReadRequest, deadline: float) -> FakeResponse:
+        def check_deadline():
+            if time.monotonic() >= deadline:
+                raise FetchStopped('time_budget')
         try:
             token = self._token()
+            check_deadline()
             if not isinstance(token,str) or not re.fullmatch(r'[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+',token) or len(token)>16_384:
                 raise ValueError
             async with httpx.AsyncClient(transport=self._transport,trust_env=False,
@@ -129,6 +149,7 @@ class ReadOnlyHTTP:
                 suppress_provider_diagnostics()
                 async with client.stream('GET',HOST+request.path,params=request.query,
                                          headers={'Authorization':'Bearer '+token,'Accept':'application/json','Accept-Encoding':'identity'}) as response:
+                    check_deadline()
                     if response.status_code != 200:
                         # Do not read or echo private error bodies or redirect destinations.
                         return FakeResponse(response.status_code,b'')
@@ -143,9 +164,11 @@ class ReadOnlyHTTP:
                         raise FetchStopped('byte_budget')
                     data=bytearray()
                     async for chunk in response.aiter_raw(chunk_size=8192):
+                        check_deadline()
                         if len(data)+len(chunk)>self._max_bytes:
                             raise FetchStopped('byte_budget')
                         data.extend(chunk)
+                    check_deadline()
                     return FakeResponse(200,bytes(data))
         except FetchStopped:
             raise
