@@ -84,6 +84,7 @@ export async function connectPatched() {
   const workdir = fs.mkdtempSync(`${os.tmpdir()}/pbmcp-canary-`);
   const patched = `${workdir}/server.py`;
   fs.writeFileSync(patched, src);
+  fs.copyFileSync(new URL("../transaction_analytics.py", import.meta.url), `${workdir}/transaction_analytics.py`);
   const transport = new StdioClientTransport({
     command: process.env.SERVER_CMD, args: [patched, ...args.slice(1)],
     env: { ...process.env }, stderr: "pipe",
@@ -94,4 +95,4 @@ export async function connectPatched() {
   await client.connect(transport);
   const cleanup = async () => { try { await client.close(); } finally { fs.rmSync(workdir, { recursive: true, force: true }); } };
   return { client, stderr: () => stderrBuf, cleanup };
-    }
+                              }
