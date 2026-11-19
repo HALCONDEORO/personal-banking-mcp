@@ -109,3 +109,12 @@ The tests and notes are original project material under the project's MIT licens
 - Modifications dated 2026-11-19, copyright Marco Antonio Tevar Asensio: adapt the injected probe and fixed safe verdict table from retail-page diagnostics to a private read-only provider status probe. Remove all URLs, scraping, page parsing, error-message interpolation and automatic live fetch behavior. Add total cooperative timeout with late-success rejection, no retry, typed result/status validation, explicit incomplete-readiness/history labels and no private exception exposure. Do not adopt anti-bot code, bank mutation or automatic consent handling.
 
 Tests and notes are original project material under the project's MIT license. The existing root project license is not replaced.
+
+
+## provider_load.py queue adaptation
+
+The serial queue, interval and injected-clock pattern in provider_load.py is adapted from src/load-control.mjs at HALCONDEORO/tesco-ie-grocery-mcp, commit08db94c5230ab74d9a573415442e22a5961e5c69, MIT, Copyright(c)2026MarcoTevar.
+
+Pinned source: https://raw.githubusercontent.com/HALCONDEORO/tesco-ie-grocery-mcp/08db94c5230ab74d9a573415442e22a5961e5c69/src/load-control.mjs
+
+Changes: rewritten in Python asyncio, bounded active/waiting job count, per-workflow call slots and monotonic deadline, cancellation propagation, generic errors and synthetic tests. No upstream challenge detection, fetch API or error-message interpolation is included. The full MIT license is retained in LICENSES/tesco-ie-grocery-mcp-MIT.txt. Prior attributions are unchanged. This adaptation does not establish a bank quota policy.
