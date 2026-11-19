@@ -19,3 +19,34 @@ Full guide: `CONFIGURACION.md` (Spanish). Short version:
 | `ENABLE_BANKING_APP_ID` | Application ID from the console | Treat as private |
 | `ENABLE_BANKING_KEY_PATH` | Absolute path to the RSA private key (outside the repo) | The path is not; the file is |
 | `ENABLE_BANKING_SANDBOX` | `true`/`false`: sandbox console or production | No |
+
+## Run and test the synthetic server
+
+Python 3.10 or newer. From the repository root:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m pip check
+python -m unittest -v
+python -O -m unittest -v
+python test_server.py --demo
+```
+
+The demo starts a real local MCP client/server session over stdio and prints invented data. It needs no bank credentials. To start only the server, run `python server.py`; it waits for an MCP client, not an interactive terminal command.
+
+Example client configuration, replace both absolute paths with your checkout location:
+
+```json
+{
+  "mcpServers": {
+    "personal-banking-demo": {
+      "command": "/absolute/path/personal-banking-mcp/.venv/bin/python",
+      "args": ["/absolute/path/personal-banking-mcp/server.py"]
+    }
+  }
+}
+```
+
+No environment variables or API keys belong in this example. The server entry point works independently of the client's working directory.
