@@ -1,0 +1,24 @@
+{
+  "name": "personal-banking-mcp-test-suite",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/properties.mjs && node tests/fuzz.mjs && node e2e/mcp-client-check.mjs",
+    "test:properties": "node tests/properties.mjs",
+    "test:fuzz": "node tests/fuzz.mjs",
+    "test:e2e": "node e2e/mcp-client-check.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "fast-check": "^4.10.3"
+  },
+  "private": true
+}
