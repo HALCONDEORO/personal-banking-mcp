@@ -9,7 +9,7 @@
 
 **Synthetic-data prototype. No bank connection.** The current MCP server cannot connect to Revolut or any other bank, move money or change an account. The Enable Banking adapter work is experimental and disconnected from MCP. This is not a current-balance service or financial advice.
 
-[Quick start](#quick-start) · [Five tools](#five-read-only-tools) · [Connect a client](#connect-an-mcp-client) · [Documentation](#documentation) · [Español](README.es.md)
+[Quick start](#quick-start) · [Five tools](#five-read-only-tools) · [Connect a client](#connect-an-mcp-client) · [Documentation](#documentation) · [Final goals](ROADMAP.md)
 
 ## At a glance
 
@@ -86,6 +86,14 @@ Use a client that supports local stdio servers. Replace both absolute paths:
 
 On Windows, use a JSON-compatible path such as `C:/path/personal-banking-mcp/.venv/Scripts/python.exe`. Configuration location and schema depend on your client. No bank token, environment variable or account identifier is needed. Running `python server.py` alone waits for an MCP client; it is not an interactive prompt and does not open an HTTP listener.
 
+## Where this project is going
+
+The goal is a real, personal, read-only connection through Enable Banking, with signing-key custody on the operator's own computer, explicit bank consent, accounts/balances/transactions and useful bounded analysis. It should be easy to install, verify, stop and recover without exposing credentials or financial data.
+
+That is the target, not the current feature set. Windows key handling, exact Production redirect acceptance, reviewed registration, owner-completed account linking, the trusted signing/transport bridge and the live MCP read path still need evidence. No compatibility or delivery date is promised. Payments and account-changing tools stay outside scope.
+
+Read the [final goals and release gates](ROADMAP.md) for the full target, current position and what must be proved before real use.
+
 ## Experimental building blocks
 
 These are library/design work, **not additional connected MCP tools**:
@@ -117,11 +125,11 @@ See [Security](SECURITY.md), [Privacy](PRIVACY.md) and [Terms](TERMS.md). Synthe
 | Contribute a focused change | [Contributing](CONTRIBUTING.md) |
 | Report a security concern | [Security policy](SECURITY.md) |
 | Check reuse and licenses | [Third-party notices](THIRD_PARTY_NOTICES.md), [license inventory](LICENCIAS.md) |
-| Read in Spanish | [README.es.md](README.es.md) |
+| Understand the intended finished product | [Final goals and release gates](ROADMAP.md) |
 
 ## Contributing
 
-Small, reproducible changes with invented data are welcome. Use English for repository discussions and technical documentation. Open a focused PR, include exact test commands and limitations, and wait for independent review and green checks at the commit being merged. No live-provider tests, credentials or spending in CI. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Small, reproducible changes with invented data are welcome. Use English for repository discussions and all project documentation. Open a focused PR, include exact test commands and limitations, and wait for independent review and green checks at the commit being merged. No live-provider tests, credentials or spending in CI. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License and acknowledgements
 
