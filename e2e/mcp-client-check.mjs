@@ -19,8 +19,8 @@ const y = asOf.slice(0, 4), m = asOf.slice(5, 7);
 const WIN = { start: `${y}-${m}-01`, end: `${y}-${m}-31` };
 
 // A. tool surface
-check("A1 tool surface is exactly list_accounts/get_balance/get_transactions",
-  JSON.stringify(P.names) === JSON.stringify(["get_balance", "get_transactions", "list_accounts"]), P.names.join(","));
+check("A1 exact five read-only fixture tools",
+  JSON.stringify(P.names) === JSON.stringify(["get_balance", "get_transactions", "list_accounts", "search_transactions", "summarize_transactions"]), P.names.join(","));
 check("A2 no payment/transfer/http/fetch/write tool", !P.names.some(t => /pay|transfer|http|fetch|request|send|delete|post|write|create/i.test(t)));
 const toolObjs = (await P.client.listTools()).tools;
 check("A3 every tool is annotated read-only (readOnlyHint, not destructive, idempotent, closed world)",
@@ -132,6 +132,18 @@ check("E1 unknown tool -> error and server healthy afterwards", unkErr && !healt
 const r1 = JSON.stringify(payload(await call("get_transactions", txArgs(P.knownId, { ...WIN, limit: 100 }))));
 const r2 = JSON.stringify(payload(await call("get_transactions", txArgs(P.knownId, { ...WIN, limit: 100 }))));
 check("H1 repeated identical reads are identical", r1 === r2 && !JSON.parse(r1).code);
+
+// New fixture analytics contract, real stdio calls, no adapter activation.
+const sr = payload(await call("search_transactions", txArgs(P.knownId, {...WIN,query:"REFUND"})));
+check("G1 search fixture refund with explicit scope", sr.live === false && sr.source === "synthetic-fixtures" && sr.data?.matched_in_input === 1 && sr.data?.scope === "supplied_rows_only");
+const sm = payload(await call("summarize_transactions", txArgs(P.knownId, WIN)));
+check("G2 exact booked and pending totals stay separate", sm.live === false && sm.data?.history_completeness === "not_verified" && sm.data?.totals?.some(t=>t.status === "booked" && t.net === "87.60") && sm.data?.totals?.some(t=>t.status === "pending" && t.net === "-9.99"));
+for (const invalid of [true, "2", 2.5, 0, 101]) {
+  check("G3 invalid search limit " + JSON.stringify(invalid), isErr(await call("search_transactions",txArgs(P.knownId,{...WIN,limit:invalid}))));
+}
+check("G4 long query rejected", isErr(await call("search_transactions",txArgs(P.knownId,{...WIN,query:"x".repeat(257)}))));
+check("G5 unknown account summary rejected", isErr(await call("summarize_transactions",txArgs("not-an-account",WIN))));
+
 
 await P.client.close();
 

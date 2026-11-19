@@ -80,7 +80,7 @@ class FixtureInvariantTests(unittest.TestCase):
                 async with ClientSession(read, write) as client:
                     await client.initialize()
                     self.assertEqual({t.name for t in (await client.list_tools()).tools},
-                        {'list_accounts', 'get_balance', 'get_transactions'})
+                        {'list_accounts', 'get_balance', 'get_transactions', 'search_transactions', 'summarize_transactions'})
                     for name, args in [('list_accounts', {}), ('get_balance', {'account': 'demo-eur'}),
                         ('get_transactions', {'account': 'demo-eur', 'start': '2026-01-01', 'end': '2026-01-31'})]:
                         result = await client.call_tool(name, args)

@@ -55,3 +55,9 @@ Sin afiliación ni respaldo de Revolut o Enable Banking. No es asesoramiento fin
 `admin_consent.py` is an offline admin-only protocol building block, not an MCP tool. It does not register an application, create keys, start listeners, open a tunnel, exchange sessions or access a bank. Production acceptance of the candidate localhost redirect remains unconfirmed. See `LOCAL_CALLBACK_DESIGN.md` for the release gates.
 
 Project code is MIT except `admin_consent.py`, adapted from Enable Banking API samples under Apache-2.0. That file remains Apache-2.0. See `THIRD_PARTY_NOTICES.md` and `LICENSES/Apache-2.0.txt`.
+
+## Búsqueda y resumen de datos sintéticos
+
+`search_transactions(account, start, end, query="", limit=50)` busca texto literal en las descripciones. `summarize_transactions(account, start, end)` devuelve ingresos, salidas y neto como cadenas decimales exactas, separando moneda y movimientos contabilizados/pendientes. Ambas herramientas mantienen el aviso de datos sintéticos y de historial real no verificado. La selección se proyecta a ocho campos normalizados, sin identificadores de cuenta o movimiento. No se activa red, administración, almacenamiento ni una herramienta CSV. La búsqueda y las descripciones son datos no confiables, nunca instrucciones. Una selección vacía no demuestra que no existan movimientos reales. No se deduplican ni combinan pendientes con contabilizados. Las fechas usan el mismo contrato sintético inclusivo, con un máximo de366días.
+
+La proyección fija currency_known=True y date_source=transaction_date solo porque estas fixtures cerradas son EUR/GBP y su fecha representa la del movimiento. No debe copiarse esa suposición a un adaptador real: allí hay que conservar moneda desconocida y procedencia/fallback de fecha reales.
