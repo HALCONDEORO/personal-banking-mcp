@@ -28,7 +28,7 @@ MCP local y de **solo lectura** para banca personal, con enfoque *fixture-first*
 
 ## Licencia
 
-MIT propuesta en LICENSE. Titular del copyright pendiente de confirmación antes de cualquier publicación. Ver `LICENCIAS.md` para la política de licencias de dependencias.
+Código bajo MIT en LICENSE. Copyright: Marco Antonio Tevar Asensio. Ver `LICENCIAS.md` para la política de licencias de dependencias.
 
 ## Herramientas y límites actuales
 
