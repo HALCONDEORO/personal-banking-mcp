@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions should help someone reproduce the synthetic demo without credentials. Use English for code, pull requests and technical documentation; Spanish user-facing documentation is welcome alongside it.
+Contributions should help someone reproduce the synthetic demo without credentials. Use English for code, pull requests and technical documentation; All maintained project documentation is in English.
 
 ## Workflow
 
@@ -33,7 +33,7 @@ Report sensitive security issues as SECURITY.md describes, not with a public pay
 
 ## Documentation and the project site
 
-Keep the main README and repository discussions in English. Preserve Spanish documentation in README.es.md. The canonical English page is README.md; README.en.md is a compatibility pointer.
+Keep the main README and repository discussions in English. Legacy language-named files are English compatibility pointers, not separate translations. The canonical English page is README.md; README.en.md is a compatibility pointer.
 
 The static project site lives in docs/index.html and is published through GitHub Pages from main /docs after review. Do not add tracking, remote scripts, credential forms or live financial examples. Verify desktop and narrow-screen layouts, keyboard focus, local links, all five tool names and prototype limitations. Site copy must distinguish a static illustration from an actual runtime receipt.
 
