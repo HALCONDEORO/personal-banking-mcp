@@ -48,3 +48,10 @@ El repositorio está pensado para cualquier usuario, sin configuración personal
 Código original MIT, copyright 2026 Marco Antonio Tevar Asensio. Los paquetes conservan sus propias licencias. El SDK Python MCP es una dependencia MIT instalada, no código vendorizado; su aviso está en THIRD_PARTY_NOTICES.md. Ver LICENSE, LICENCIAS.md y dependency-licenses.json.
 
 Sin afiliación ni respaldo de Revolut o Enable Banking. No es asesoramiento financiero. MIT licencia el código, no el acceso al proveedor, los datos bancarios, las marcas ni permisos regulatorios. Para las referencias de diseño sin código copiado y sus fuentes, consulta README.en.md.
+
+
+## Offline AIS consent design
+
+`admin_consent.py` is an offline admin-only protocol building block, not an MCP tool. It does not register an application, create keys, start listeners, open a tunnel, exchange sessions or access a bank. Production acceptance of the candidate localhost redirect remains unconfirmed. See `LOCAL_CALLBACK_DESIGN.md` for the release gates.
+
+Project code is MIT except `admin_consent.py`, adapted from Enable Banking API samples under Apache-2.0. That file remains Apache-2.0. See `THIRD_PARTY_NOTICES.md` and `LICENSES/Apache-2.0.txt`.

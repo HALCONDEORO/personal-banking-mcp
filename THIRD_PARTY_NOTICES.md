@@ -55,3 +55,18 @@ Other installed packages retain their respective licenses. Full dependency revie
 - Modifications dated 2026-11-19: Marco Antonio Tevar Asensio.
 
 `provider_normalize.patch` modifies existing project code and retains its project MIT license. `patch-base.json` records the exact observed main revision. Apply the minimal patch only after verifying its base/context; do not replace newer normalizer changes blindly. The full patched normalizer is included for reviewer execution, not as authority to overwrite remote changes.
+
+## Enable Banking API samples
+
+- Upstream repository: https://github.com/enablebanking/enablebanking-api-samples
+- Pinned commit: `7a16788840c42b63c305652f8ea29ab69207db25`
+- Source: `python_example/account_information.py`
+- License: Apache License 2.0, reproduced in `LICENSES/Apache-2.0.txt`.
+- Upstream copyright attribution: Enable Banking API samples contributors. The source file has no explicit copyright notice; the upstream LICENSE contains only the standard appendix placeholder, not a claimed dated copyright. No upstream NOTICE file was present in this tree.
+- Source link: https://github.com/enablebanking/enablebanking-api-samples/blob/7a16788840c42b63c305652f8ea29ab69207db25/python_example/account_information.py
+- Adapted file: `admin_consent.py`, under Apache-2.0, not relicensed as MIT.
+- Modifications dated 2026-11-19, copyright Marco Antonio Tevar Asensio: extract the AIS request-body and callback sequence into an offline admin-only building block; remove printing, requests, credentials, JWT generation, live network, automatic first-account selection and unrestricted data output. Require personal mode, bank/country selection, a fixed loopback redirect, cryptographic one-use state, constant-time state comparison, strict callback shape and monotonic five-minute deadline. Bound access duration independently. No payment code was used.
+
+The test module is original project code. The repository's existing MIT license is not replaced by this package. Apache obligations apply to the adapted file and any downstream modifications of it.
+
+Lifecycle additions dated 2026-11-19: `remaining_seconds` and `closed` expose only attempt lifetime and closure, never state or code. These modifications to `admin_consent.py` remain Apache-2.0.
