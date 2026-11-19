@@ -29,3 +29,7 @@ Official sources:
 - https://enablebanking.com/docs/api/reference/
 
 These links describe external services whose terms and availability can change. Re-check them before implementing or using real access. Publishing MIT code does not grant rights to use a bank API, distribute bank data or provide a regulated service.
+
+## Disconnected HTTP/JWT experiment
+
+An experimental opt-in HTTP/JWT library is present but not wired to the MCP. No live compatibility is claimed. It uses process-wide logging-handler suppression and has no aggregate request budget. See [HTTP-EXPERIMENT.md](HTTP-EXPERIMENT.md) before considering any real use.
