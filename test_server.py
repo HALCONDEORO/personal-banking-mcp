@@ -126,10 +126,10 @@ async def _run_protocol(parameters, trace, stderr):
         async with ClientSession(read,write) as client:
             initialized=await client.initialize()
             tools=await client.list_tools()
-            require({t.name for t in tools.tools}=={'list_accounts','get_balance','get_transactions'}, 'Protocol assertion failed')
+            require({t.name for t in tools.tools}=={'list_accounts','get_balance','get_transactions','search_transactions','summarize_transactions'}, 'Protocol assertion failed')
             require(all(t.annotations.readOnlyHint and not t.annotations.destructiveHint for t in tools.tools), 'Protocol assertion failed')
             trace.append({'step':'initialize','protocol':initialized.protocolVersion,'tools':[t.name for t in tools.tools]})
-            for name,args in [('list_accounts',{}),('get_balance',{'account':'demo-eur'}),('get_transactions',{'account':'demo-eur','start':'2026-01-01','end':'2026-01-10','limit':2})]:
+            for name,args in [('list_accounts',{}),('get_balance',{'account':'demo-eur'}),('get_transactions',{'account':'demo-eur','start':'2026-01-01','end':'2026-01-10','limit':2}),('search_transactions',{'account':'demo-eur','start':'2026-01-01','end':'2026-01-10','query':'refund'}),('summarize_transactions',{'account':'demo-eur','start':'2026-01-01','end':'2026-01-10'})]:
                 result=await client.call_tool(name,args)
                 require(not result.isError, 'Protocol assertion failed')
                 payload=json.loads(result.content[0].text)
@@ -150,12 +150,12 @@ async def _run_protocol(parameters, trace, stderr):
 class ProtocolTests(unittest.TestCase):
     def test_real_stdio_client(self):
         trace=asyncio.run(protocol_smoke())
-        self.assertEqual(len(trace),8)
+        self.assertEqual(len(trace),10)
     def test_protocol_with_network_denied(self):
         trace=asyncio.run(protocol_smoke(no_network=True))
-        self.assertEqual(len(trace),8)
+        self.assertEqual(len(trace),10)
     def test_server_from_other_working_directory(self):
-        self.assertEqual(len(asyncio.run(protocol_smoke(elsewhere=True))),8)
+        self.assertEqual(len(asyncio.run(protocol_smoke(elsewhere=True))),10)
 
 if __name__=='__main__':
     if '--demo' in sys.argv:
