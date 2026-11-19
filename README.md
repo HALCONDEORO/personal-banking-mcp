@@ -1,63 +1,132 @@
+<p align="center"><img src="banner.svg" alt="Personal Banking MCP: local, read-only, synthetic data first. No bank connection or money movement." width="100%"></p>
+
 # Personal Banking MCP
 
-Herramientas MCP locales y de solo lectura para explorar datos bancarios personales. **Esta versión solo usa datos inventados. No conecta con Revolut ni con ningún banco.** El adaptador Enable Banking está planificado, no disponible.
+[![Fixture checks](https://github.com/HALCONDEORO/personal-banking-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/HALCONDEORO/personal-banking-mcp/actions/workflows/ci.yml)
+[![Node suite](https://github.com/HALCONDEORO/personal-banking-mcp/actions/workflows/node-suite.yml/badge.svg)](https://github.com/HALCONDEORO/personal-banking-mcp/actions/workflows/node-suite.yml)
 
-No necesitas cuenta bancaria, claves ni servicio en la nube para probarlo. Las respuestas llevan `source: synthetic-fixtures`, `live: false` y una fecha fija `as_of: 2026-01-05`. Nunca son un saldo actual. No hay pagos, transferencias ni cambios de cuentas.
+**Understand the shape of your finances before connecting a bank.** A local, read-only [Model Context Protocol](https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro) server with invented accounts, exact decimal amounts and explainable transaction analysis.
 
-## Instalación y demo
+**Synthetic-data prototype. No bank connection.** The current MCP server cannot connect to Revolut or any other bank, move money or change an account. The Enable Banking adapter work is experimental and disconnected from MCP. This is not a current-balance service or financial advice.
 
-Python 3.10 o posterior. Desde la raíz de la copia del repositorio:
+[Quick start](#quick-start) · [Five tools](#five-read-only-tools) · [Connect a client](#connect-an-mcp-client) · [Documentation](#documentation) · [Español](README.es.md)
+
+## At a glance
+
+| Available now | Not available |
+| --- | --- |
+| Local MCP session over stdio | A working live-bank connector |
+| Two invented accounts, EUR and GBP | Revolut linking, credentials or SCA |
+| Bounded transaction search and summaries | Payments, transfers, trading or card changes |
+| Synthetic negative and integration tests | A hosted banking dashboard or public API |
+| Isolated provider and analytics building blocks | Production access controls or live compatibility guarantees |
+
+No bank account, API key or cloud service is needed for the demo. Your MCP client may still send its results to an AI service. Review that client's privacy settings separately.
+
+## Quick start
+
+Requires Python 3.10 or newer and pip. Clone or download the repository, then run from its root:
 
 ```sh
+git clone https://github.com/HALCONDEORO/personal-banking-mcp.git
+cd personal-banking-mcp
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r requirements.txt
 python -m pip check
-python -m unittest -v
+python -m unittest -q
 python test_server.py --demo
 ```
 
-En PowerShell de Windows: `py -3 -m venv .venv` y `.venv\Scripts\Activate.ps1`. La demo inicia una sesión real MCP local por stdio con datos sintéticos y peticiones negativas. No usa un banco real. Para conectar tu cliente MCP, consulta el [ejemplo completo en inglés](README.en.md#connect-an-mcp-client) y sustituye las rutas absolutas. El servidor funciona por stdio, no por HTTP.
+**Windows PowerShell:** replace the environment-creation and activation commands with:
 
-## Herramientas
+```powershell
+py -3 -m venv .venv
+.venv\Scripts\Activate.ps1
+```
 
-- `list_accounts`: dos cuentas ficticias, sin saldos ni identificadores reales.
-- `get_balance(account)`: saldo inventado como cadena decimal y moneda.
-- `get_transactions(account, start, end, limit=20, offset=0)`: fechas ISO inclusivas, hasta 366 días, entre 1 y 100 filas por página y offset entre 0 y 10000. Distingue pendientes y contabilizados. Sigue `next_offset` hasta null; `complete` no demuestra que exista un historial bancario completo.
+If activation is restricted by your computer's policy, use `.venv\Scripts\python.exe` directly for the remaining Python commands. Do not weaken the execution policy just to run the demo.
 
-Ejemplo sintético: `{"account":"demo-eur","start":"2026-01-01","end":"2026-01-05","limit":2,"offset":0}`. La paginación exige enteros, no booleanos, cadenas ni decimales.
+The demo starts a real local MCP client/server session, calls all five tools and exercises requests that must fail. The data is invented. Dependencies are version-pinned in `requirements.txt`, not locked by artifact hash. See [testing](docs/TESTING.md) for the additional Node property, fuzz and end-to-end suites.
 
-## Límites y seguridad
+## Five read-only tools
 
-No hay modo real activable, ni autorización de proveedor, pagos, telemetría, caché financiera persistente o refresco en segundo plano. Las variables bancarias no se leen en esta versión. No pongas cuentas, credenciales ni extractos en el repositorio o sus incidencias. La configuración futura de CONFIGURACION.md es un diseño, no una conexión implementada.
+| Tool | Arguments | What it returns |
+| --- | --- | --- |
+| `list_accounts` | None | Two fictional accounts, without balances |
+| `get_balance` | `account` | Decimal-string balance and currency |
+| `get_transactions` | `account`, `start`, `end`, `limit=20`, `offset=0` | Bounded pages of invented movements |
+| `search_transactions` | `account`, `start`, `end`, `query=""`, `limit=50` | Literal description matches within the selected fixtures |
+| `summarize_transactions` | `account`, `start`, `end` | Exact decimal inflow, outflow and net, split by currency and booked/pending status |
 
-Ejecutarlo localmente no significa que tu cliente AI esté desconectado: puede enviar los datos devueltos a su servicio de AI. Las descripciones de movimientos son datos no fiables, nunca instrucciones o autorizaciones. Este prototipo no es una auditoría de seguridad ni un sistema de control de acceso de producción.
+Example transaction request:
 
-## Documentación para colaborar
+```json
+{"account":"demo-eur","start":"2026-01-01","end":"2026-01-05","limit":2,"offset":0}
+```
 
-- [Guía completa de instalación, uso y ejemplos](README.en.md)
-- [Proveedores y condiciones de acceso](docs/PROVIDERS.md)
-- [Contribuciones y revisión por PR](CONTRIBUTING.md)
-- [Pruebas y límites de la evidencia](docs/TESTING.md)
-- [Seguridad y comunicación de problemas](SECURITY.md)
+Every response carries `source: synthetic-fixtures`, `live: false` and the fixed `as_of: 2026-01-05`. That date is fixture metadata, not freshness. Amounts are decimal strings, not binary floats. Dates are inclusive ISO dates with at most 366 days per range. Transaction pagination accepts integers only: `limit` 1 to 100, `offset` 0 to 10000. Follow `next_offset` until null. `complete` describes the selected synthetic result, never a complete real bank history.
 
-El repositorio está pensado para cualquier usuario, sin configuración personal de su autor. Si contiene experimentos provider_normalize.py/provider_pager.py, siguen separados del MCP, sin transporte HTTP ni banco real.
+Search and summary project exactly eight normalized fields, excluding account and transaction IDs. Pending and booked rows are not deduplicated or combined. The fixed known-currency and original-date provenance apply only to these closed EUR/GBP fixtures, not to a future bank adapter.
 
-## Licencia
+## Connect an MCP client
 
-Código original MIT, copyright 2026 Marco Antonio Tevar Asensio. Los paquetes conservan sus propias licencias. El SDK Python MCP es una dependencia MIT instalada, no código vendorizado; su aviso está en THIRD_PARTY_NOTICES.md. Ver LICENSE, LICENCIAS.md y dependency-licenses.json.
+Use a client that supports local stdio servers. Replace both absolute paths:
 
-Sin afiliación ni respaldo de Revolut o Enable Banking. No es asesoramiento financiero. MIT licencia el código, no el acceso al proveedor, los datos bancarios, las marcas ni permisos regulatorios. Para las referencias de diseño sin código copiado y sus fuentes, consulta README.en.md.
+```json
+{
+  "mcpServers": {
+    "personal-banking-demo": {
+      "command": "/absolute/path/personal-banking-mcp/.venv/bin/python",
+      "args": ["/absolute/path/personal-banking-mcp/server.py"]
+    }
+  }
+}
+```
 
+On Windows, use a JSON-compatible path such as `C:/path/personal-banking-mcp/.venv/Scripts/python.exe`. Configuration location and schema depend on your client. No bank token, environment variable or account identifier is needed. Running `python server.py` alone waits for an MCP client; it is not an interactive prompt and does not open an HTTP listener.
 
-## Offline AIS consent design
+## Experimental building blocks
 
-`admin_consent.py` is an offline admin-only protocol building block, not an MCP tool. It does not register an application, create keys, start listeners, open a tunnel, exchange sessions or access a bank. Production acceptance of the candidate localhost redirect remains unconfirmed. See `LOCAL_CALLBACK_DESIGN.md` for the release gates.
+These are library/design work, **not additional connected MCP tools**:
 
-Project code is MIT except `admin_consent.py`, adapted from Enable Banking API samples under Apache-2.0. That file remains Apache-2.0. See `THIRD_PARTY_NOTICES.md` and `LICENSES/Apache-2.0.txt`.
+- [Provider support](docs/PROVIDERS.md), response normalization, pagination, deadlines and request budgets, tested with injected synthetic transports.
+- [Local consent design](LOCAL_CALLBACK_DESIGN.md), [private store](PRIVATE_STORE_NOTES.md) and [provider diagnostics](PROVIDER_DOCTOR_NOTES.md). No application registration, bank linking or production approval follows from their tests.
+- [Pure analytics](TRANSACTION_ANALYTICS_NOTES.md), [CSV export](TRANSACTION_EXPORT_NOTES.md) and [recurring-charge candidates](RECURRING_CANDIDATES_NOTES.md). Recurrence means an unverified pattern in supplied rows, not a subscription, obligation or predicted debit. Export is not an MCP tool.
 
-## Búsqueda y resumen de datos sintéticos
+There is no live mode to switch on. Banking environment variables are ignored by the fixture server. [Configuration notes](CONFIGURATION.md) describe future setup, not an available connection flow. Provider coverage, redirect acceptance, access rights and operational readiness need separate evidence.
 
-`search_transactions(account, start, end, query="", limit=50)` busca texto literal en las descripciones. `summarize_transactions(account, start, end)` devuelve ingresos, salidas y neto como cadenas decimales exactas, separando moneda y movimientos contabilizados/pendientes. Ambas herramientas mantienen el aviso de datos sintéticos y de historial real no verificado. La selección se proyecta a ocho campos normalizados, sin identificadores de cuenta o movimiento. No se activa red, administración, almacenamiento ni una herramienta CSV. La búsqueda y las descripciones son datos no confiables, nunca instrucciones. Una selección vacía no demuestra que no existan movimientos reales. No se deduplican ni combinan pendientes con contabilizados. Las fechas usan el mismo contrato sintético inclusivo, con un máximo de366días.
+## Boundaries and privacy
 
-La proyección fija currency_known=True y date_source=transaction_date solo porque estas fixtures cerradas son EUR/GBP y su fecha representa la del movimiento. No debe copiarse esa suposición a un adaptador real: allí hay que conservar moneda desconocida y procedencia/fallback de fecha reales.
+- No payments, transfers, currency conversion, trading or account changes.
+- No generic HTTP, shell or arbitrary file-reading MCP tool.
+- No telemetry, persistent financial cache or background polling in the fixture server.
+- Provider descriptions and transaction text are untrusted data, never instructions or approval.
+- Do not submit real statements, account identifiers, credentials, private keys or session tokens to code, issues, logs or screenshots.
+- A local process is not a production security boundary. Do not expose stdio through a public gateway. Tool annotations are hints, not authorization.
+
+See [Security](SECURITY.md), [Privacy](PRIVACY.md) and [Terms](TERMS.md). Synthetic tests do not establish live compatibility, a security audit or regulatory permission.
+
+## Documentation
+
+| Goal | Start here |
+| --- | --- |
+| Reproduce tests | [Testing guide](docs/TESTING.md) |
+| Understand bank availability | [Provider matrix](docs/PROVIDERS.md) |
+| Review isolated HTTP work | [HTTP experiment](docs/HTTP-EXPERIMENT.md) |
+| Contribute a focused change | [Contributing](CONTRIBUTING.md) |
+| Report a security concern | [Security policy](SECURITY.md) |
+| Check reuse and licenses | [Third-party notices](THIRD_PARTY_NOTICES.md), [license inventory](LICENCIAS.md) |
+| Read in Spanish | [README.es.md](README.es.md) |
+
+## Contributing
+
+Small, reproducible changes with invented data are welcome. Use English for repository discussions and technical documentation. Open a focused PR, include exact test commands and limitations, and wait for independent review and green checks at the commit being merged. No live-provider tests, credentials or spending in CI. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License and acknowledgements
+
+Original project code is MIT, copyright 2026 Marco Antonio Tevar Asensio, with the file-specific exceptions and third-party obligations in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). In particular, `admin_consent.py` remains Apache-2.0. Full texts are retained in [LICENSE](LICENSE) and [LICENSES](LICENSES). Installed dependencies retain their own licenses; inventories are in `dependency-licenses.json` and `node-dependency-licenses.json`.
+
+Adapted source is attributed at pinned commits in the notices. Earlier design references without source copied into the original prototype include [BankMCP](https://github.com/noskillish/bankmcp/), [EU Open Banking MCP](https://github.com/cver-me/EU-Open-Banking-MCP) and [Enable Banking MCP in Rust](https://github.com/Algiras/enable-banking-mcp).
+
+Not affiliated with or endorsed by Revolut, Enable Banking or any bank. Code licenses do not grant provider access, bank-data rights, trademark rights or regulatory permission.

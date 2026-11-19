@@ -30,3 +30,11 @@ Explain why a dependency is needed, pin it through the appropriate requirements 
 Small reproducible fixes, strict validation, privacy-preserving error handling, clearer installation steps, deterministic negative tests and documented limitations are useful. Avoid claims of production readiness, whole-history completeness or real-bank support that the code and evidence cannot establish.
 
 Report sensitive security issues as SECURITY.md describes, not with a public payload.
+
+## Documentation and the project site
+
+Keep the main README and repository discussions in English. Preserve Spanish documentation in README.es.md. The canonical English page is README.md; README.en.md is a compatibility pointer.
+
+The static project site lives in docs/index.html and is published through GitHub Pages from main /docs after review. Do not add tracking, remote scripts, credential forms or live financial examples. Verify desktop and narrow-screen layouts, keyboard focus, local links, all five tool names and prototype limitations. Site copy must distinguish a static illustration from an actual runtime receipt.
+
+For a docs PR, include what changed, why, tests, screenshots, risks and rollback. Do not replace license texts or drop third-party notices while redesigning.
