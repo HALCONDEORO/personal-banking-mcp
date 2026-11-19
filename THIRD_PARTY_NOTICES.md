@@ -96,3 +96,16 @@ Tests and integration notes are original project material. Keep the project's ex
 - Modifications dated 2026-11-19, copyright Marco Antonio Tevar Asensio: port the session/account interface shape to an offline Python validation boundary, cross-check official provider response schemas, drop all account extras, enforce personal mode and selected-bank binding, strict private UUID allowlists, bounded/unique accounts and expiry no later than the approved request. Add constant private repr, explicit internal ID handoff and a summary that does not claim current consent. No upstream networking, JWT caching, OAuth server, password handling, webhook, payment, attestation or session mutation code is used.
 
 The tests and notes are original project material under the project's MIT license. Keep this attribution and upstream MIT license with the adapted module. The project root license is not replaced.
+
+## Tesco grocery MCP doctor pattern
+
+- Repository: https://github.com/HALCONDEORO/tesco-ie-grocery-mcp
+- Commit: `08db94c5230ab74d9a573415442e22a5961e5c69`
+- Source: `src/doctor.mjs`
+- Source URL: https://github.com/HALCONDEORO/tesco-ie-grocery-mcp/blob/08db94c5230ab74d9a573415442e22a5961e5c69/src/doctor.mjs
+- Original copyright: Copyright (c) 2026 Marco Tevar.
+- License: MIT, original full text in `LICENSES/tesco-ie-grocery-mcp-MIT.txt`.
+- Adapted file: `provider_doctor.py`.
+- Modifications dated 2026-11-19, copyright Marco Antonio Tevar Asensio: adapt the injected probe and fixed safe verdict table from retail-page diagnostics to a private read-only provider status probe. Remove all URLs, scraping, page parsing, error-message interpolation and automatic live fetch behavior. Add total cooperative timeout with late-success rejection, no retry, typed result/status validation, explicit incomplete-readiness/history labels and no private exception exposure. Do not adopt anti-bot code, bank mutation or automatic consent handling.
+
+Tests and notes are original project material under the project's MIT license. The existing root project license is not replaced.
