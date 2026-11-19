@@ -132,3 +132,11 @@ https://raw.githubusercontent.com/elcukro/bank-mcp/c6abad503b1ecec47e80108ef8d0c
 Full text: LICENSES/elcukro-bank-mcp-MIT.txt.
 
 Changes: Python pure bounded supplied-row functions, exact Decimal strings instead of float, explicit currency/status/date provenance and incomplete-history scope. No SQL, DB, fetch, cron, automatic categories or token/config handling. Previous notices and license files remain unchanged.
+
+
+## transaction_export.py CSV text-cell adaptation
+
+Adapted csv_cell from chemical_cabinet/app.py in HALCONDEORO/chemical-cabinet, commit a0ca143f206f7d92aa9b2676de00e729c282442e, MIT, Copyright(c)2026 chemical-cabinet contributors.
+Pinned source: https://raw.githubusercontent.com/HALCONDEORO/chemical-cabinet/a0ca143f206f7d92aa9b2676de00e729c282442e/chemical_cabinet/app.py
+Full license: LICENSES/chemical-cabinet-MIT.txt.
+Changes: explicit field selection, validated normalized supplied financial rows, bounded UTF8 bytes, scope metadata and synthetic tests. No DB/app/file path/write/share or numeric spreadsheet guarantee. Prior notices and full license texts retained unchanged.
