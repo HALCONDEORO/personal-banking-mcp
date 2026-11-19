@@ -29,3 +29,28 @@ A local, **read-only** MCP server for personal banking, fixture-first: it works 
 ## License
 
 MIT proposed in LICENSE. Copyright holder awaits confirmation before publication. See LICENCIAS.md and dependency-licenses.json.
+
+## Current tool contract and limits
+
+- `list_accounts`: two fictional accounts, no real account identifiers.
+- `get_balance(account)`: synthetic decimal-string balance and currency.
+- `get_transactions(account, start, end, limit=20, offset=0)`: inclusive ISO dates, at most 366 days, 1 to 100 rows, bounded offset pagination; pending and booked remain distinct.
+
+All results carry `source: synthetic-fixtures`, `live: false` and a fixed `as_of` date. They are not current banking information. There is no connection to Revolut or any other bank, no HTTP listener and no live adapter. This is not an official product of Revolut or Enable Banking and is not financial advice.
+
+Local execution does not make your AI client offline: your chosen MCP client may send returned data to its AI service. Transaction descriptions are untrusted data, never instructions.
+
+## Future provider access and terms
+
+Enable Banking restricted production permits personal, non-commercial access to an individual's own linked accounts, subject to its terms. Business accounts, access for clients and commercial or hosted multi-user use require checking the intended use with Enable Banking and a separate agreement where applicable. MIT licenses this source code, not provider access, bank data, trademarks or regulatory permission. Service-access sharing and competitive-use restrictions still apply. No provider acceptance is guaranteed.
+
+Consent setup uses provider authorization and session-creation operations separately from account-information reads. This prototype exposes no setup, payment or account-changing tools. Expired consent must fail closed in any future adapter.
+
+Official references checked 19 November 2026:
+
+- [Enable Banking terms](https://enablebanking.com/terms/)
+- [Own linked accounts and restricted production](https://enablebanking.com/docs/api/linked-accounts/)
+- [API reference](https://enablebanking.com/docs/api/reference/)
+- [Python MCP SDK](https://github.com/modelcontextprotocol/python-sdk), MIT dependency. Its notice is in THIRD_PARTY_NOTICES.md.
+
+Design references, no source code copied into this version: [BankMCP](https://github.com/noskillish/bankmcp/), [EU Open Banking MCP](https://github.com/cver-me/EU-Open-Banking-MCP), [Enable Banking MCP in Rust](https://github.com/Algiras/enable-banking-mcp). They are not dependencies. Dependency license metadata is in dependency-licenses.json; it does not replace license texts or distribution obligations.
