@@ -12,7 +12,7 @@ class InvalidProviderData(ValueError):
 
 
 def _fail():
-    raise InvalidProviderData("Invalid provider response")
+    raise InvalidProviderData("Invalid provider response") from None
 
 
 def _text(value, maximum=512):
@@ -65,7 +65,7 @@ def normalize_transaction(record):
     if not isinstance(indicator, str) or not isinstance(status, str) or indicator not in {"CRDT", "DBIT"} or status not in {"BOOK", "PDNG"}:
         _fail()
     if indicator == "DBIT":
-        amount = -amount
+        amount = amount.copy_negate()
     dates = {}
     for key in ("transaction_date", "booking_date", "value_date"):
         if key in record and record[key] is not None:
@@ -78,7 +78,7 @@ def normalize_transaction(record):
     if len(description) > 1024:
         _fail()
     return {
-        "amount": format(amount, "f"), "currency": currency,
+        "amount": format(amount.copy_abs() if amount.is_zero() else amount, "f"), "currency": currency,
         "currency_known": currency != "XXX",
         "status": {"BOOK": "booked", "PDNG": "pending"}[status],
         "date": dates.get(source), "date_source": source,
@@ -102,7 +102,7 @@ def normalize_balances(payload):
         if not re.fullmatch(r"[A-Z0-9]{1,12}", kind):
             _fail()
         reference = record.get("reference_date")
-        result.append({"amount": format(amount, "f"), "currency": currency,
+        result.append({"amount": format(amount.copy_abs() if amount.is_zero() else amount, "f"), "currency": currency,
                        "currency_known": currency != "XXX", "type": kind,
                        "reference_date": _iso(reference) if reference is not None else None})
     return result
