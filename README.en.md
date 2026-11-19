@@ -21,7 +21,7 @@ python test_server.py --demo
 
 Windows PowerShell: use `py -3 -m venv .venv` and `.venv\Scripts\Activate.ps1` instead of the first two commands.
 
-The demo starts a real local MCP client/server session over stdio, calls all three tools, tries requests that must fail, and prints invented results. It does not ask for banking credentials or send requests to a bank. Install dependencies only in the virtual environment. Their versions are pinned; requirements.txt is not an artifact-hash lockfile.
+The demo starts a real local MCP client/server session over stdio, calls all five read-only tools, tries requests that must fail, and prints invented results. It does not ask for banking credentials or send requests to a bank. Install dependencies only in the virtual environment. Their versions are pinned; requirements.txt is not an artifact-hash lockfile.
 
 ## Connect an MCP client
 
@@ -84,3 +84,9 @@ Original code: MIT, copyright 2026 Marco Antonio Tevar Asensio. See LICENSE. Thi
 Design references, no source code copied into the original prototype: [BankMCP](https://github.com/noskillish/bankmcp/), [EU Open Banking MCP](https://github.com/cver-me/EU-Open-Banking-MCP), [Enable Banking MCP in Rust](https://github.com/Algiras/enable-banking-mcp).
 
 Not affiliated with, endorsed by or an official product of Revolut or Enable Banking. Not financial advice. MIT covers this code, not provider access, bank data, trademarks or regulatory permission.
+
+## Fixture-only search and summary
+
+`search_transactions(account, start, end, query="", limit=50)` performs bounded literal description search. `summarize_transactions(account, start, end)` reports exact decimal inflow/outflow/net, separated by currency and booked/pending status. Both retain the synthetic envelope and unknown real-history completeness. The selection is projected to exactly eight normalized fields, excluding account/transaction identifiers. No network, admin setup, storage or CSV tool is enabled. Query text and descriptions remain untrusted data. Empty selection does not prove no real transactions; pending and booked are not deduplicated or combined. Dates use the same inclusive, at most366day fixture contract.
+
+The projection fixes currency_known=True and date_source=transaction_date ONLY for the closed EUR/GBP fixtures whose dates have that meaning. A real adapter must preserve unknown currency and actual date/fallback provenance instead of copying these assumptions.
