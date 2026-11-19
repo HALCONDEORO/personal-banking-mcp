@@ -140,3 +140,14 @@ Adapted csv_cell from chemical_cabinet/app.py in HALCONDEORO/chemical-cabinet, c
 Pinned source: https://raw.githubusercontent.com/HALCONDEORO/chemical-cabinet/a0ca143f206f7d92aa9b2676de00e729c282442e/chemical_cabinet/app.py
 Full license: LICENSES/chemical-cabinet-MIT.txt.
 Changes: explicit field selection, validated normalized supplied financial rows, bounded UTF8 bytes, scope metadata and synthetic tests. No DB/app/file path/write/share or numeric spreadsheet guarantee. Prior notices and full license texts retained unchanged.
+
+## Pure recurring-charge candidate pattern
+
+`transaction_recurring.py` adapts grouping/cadence ideas from
+`src/finmcp/analytics/subscriptions.py` in guille-near/openbanking-mcp,
+pin d61e3ad67b60aa848d96887fd4d06dc3fefbd749, MIT, copyright2026GuillePérez.
+Full license: LICENSES/guille-near-openbanking-MIT.txt. Changes: no database or
+clock; exact description/currency/Decimal amount; three distinct original dates;
+every25..35day gap; uncertainty and no predicted debit/obligation.
+
+Pinned recurring-pattern source: https://raw.githubusercontent.com/guille-near/openbanking-mcp/d61e3ad67b60aa848d96887fd4d06dc3fefbd749/src/finmcp/analytics/subscriptions.py
