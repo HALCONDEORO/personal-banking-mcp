@@ -1,33 +1,38 @@
-# Local callback design, not an operational setup yet
+# Local callback design and release gates
 
-Status: offline protocol tested. No Enable Banking application or key is created by this package. No callback listener, tunnel, TLS installation or session exchange is implemented by this package. No bank was accessed. Production acceptance of the candidate URI is awaiting the provider's answer. Do not treat third-party localhost examples as provider approval.
+Design only. The repository has isolated callback protocol, loopback HTTP receiver and admin transport prototypes tested with synthetic data. They are not a complete Windows authorization workflow. No application, key, bank consent or real session is created by these documents. The provider has not confirmed the exact localhost redirect.
 
 ## Architecture
 
-The browser and TLS endpoint run on the owner's computer. The browser opens `https://localhost:8765/callback` after the owner completes bank authentication. A private SSH local-forward carries the request to a dedicated server-side admin listener bound only to `127.0.0.1`. This listener has no MCP entry point. The MCP process never starts consent or receives the code in a tool response.
+The selected target is the owner's Windows laptop. The browser and short-lived TLS relay run there. The relay receives the candidate `https://localhost:8765/callback` and forwards only the permitted callback fields to a fixed loopback admin endpoint on the same laptop. There is no server, SSH tunnel, VM or public callback in this topology. See WINDOWS_CALLBACK_DESIGN.md for Windows-specific gaps.
 
-A tunnel alone is not TLS termination. We must implement exactly one of these: a local TLS listener forwarding to the server, or a TLS listener on the server whose localhost certificate is trusted only on the owner's computer. The second means the TLS key resides on the isolated server; the first keeps that key on the computer but needs a separate local program. Select and test the complete topology before publishing commands. Never offer a tunnel command that forwards a browser HTTPS request to a plaintext listener.
+The local admin workflow is separate from the read-only MCP process. MCP tools never start consent or receive callback state/codes. A loopback port is not an authenticated private channel against other local applications; local competing-process/interception risks need review before a real flow.
 
-## Required before setup commands
+## Gates before setup
 
-1. Provider confirmation that restricted Production accepts the exact candidate redirect and its certificate/port rules.
-2. The operator selects the computer OS and a supported local TLS tool. Install instructions must match that platform; do not assume a package manager or administrative privilege.
-3. The operator verifies the isolated Unix user, SSH key, host fingerprint and a loopback-only free port, and separately authorizes any host changes. This design is not a deployment instruction or evidence of a running service.
-4. Review final application name, description, privacy/terms URLs and redirect before registering. URLs must resolve to reviewed published documents. No browser-generated private key goes into GitHub, chat, email or query strings.
-5. Choose a local-certificate tool already supported by the owner's OS and verify its source. Explain that adding a local CA changes trust on that computer. Obtain permission before that OS trust-store change. Trust only the needed local CA and document its removal. Do not disable browser certificate checks or tell the owner to bypass warnings.
+- Confirm provider acceptance of the exact URI, localhost versus127.0.0.1, certificate and port rules. Third-party examples are not provider approval.
+- Review the Windows TLS relay and its full synthetic end-to-end tests. Do not forward HTTPS directly to a plaintext listener or disable TLS validation.
+- Choose and review Windows-native protected secret/session storage. Existing POSIX storage must not be described as Windows-ready.
+- Explain and obtain approval for certificate/trust-store changes before making them. Use the exact reviewed non-CA certificate and provide exact removal steps.
+- Show final registration name, description, redirect and published privacy/terms documents before registering Production. Do not put keys or sensitive callback values in a repository, message, URL, process argument or tool result.
 
-## Listener acceptance criteria
+## Protocol and transport requirements
 
-- Bind only loopback and verify that a LAN connection fails. No `0.0.0.0`, public reverse tunnel or public relay. Forwarded SSH ports are bound explicitly to loopback. Host key checking stays enabled. No agent forwarding.
-- GET `/callback` only, bounded request-target/header bytes and socket timeout. Reject absolute-form requests and wrong Host, duplicate query keys, fragments, unknown parameters, invalid encoding and conflicting code/error. Never trust Host or forwarded headers to reconstruct the allowed origin.
-- Start one `ConsentAttempt` immediately before the owner opens the authorization URL. State is generated in memory with 256 bits of entropy, constant-time checked, never displayed or persisted. One handler at a time; 300-second monotonic TTL; one use; error callbacks and cancellation consume the attempt.
-- No request/access logging at any layer: Python handler, reverse proxy, SSH wrapper, exception logger or terminal. Do not retain full URL, query, state, code, JWT, account IDs or session bodies. Avoid shell history arguments containing sensitive data.
-- Return only a constant success/failure page. `Cache-Control: no-store`, `Referrer-Policy: no-referrer`, restrictive CSP, no assets, no analytics, no links carrying query data. Close the listener after success, cancellation or deadline. The code is not echoed in the page.
-- Exchange the code through a separate fixed-origin admin transport that allows only the intended AIS endpoints. This transport is not the existing read-only GET adapter and must not widen it. Validate TLS, no redirects, no environment proxy, bounded body/time, no retry of consent/session writes. Session data goes directly to owner-only storage, never stdout/MCP.
-- Revolut discovery, account linking and SCA stay with the owner. Choose the actual provider bank/country from live discovery; no hardcoded Revolut country or default account. Consent duration is explicit and separate from callback TTL.
+- Explicit loopback binds only; verify no LAN access. A localhost IPv6 resolution problem is not a reason to bind every interface.
+- GET callback path only, bounded request target/headers and handshake/read deadlines. Reject wrong Host/origin, absolute-form requests, duplicate/unknown parameters, fragments, invalid encoding and code/error conflicts. Do not reconstruct trusted origins from forwarded headers.
+- Generate 256-bit state in memory per attempt. Constant-time comparison, one use, single active handler and a monotonic300-second deadline. Cancellation, denial and error callbacks consume the attempt. Bank consent duration is separate.
+- No callback/access logging in relay, handler, wrapper or exception path. Do not retain full URLs, query, codes, state, JWTs, private account IDs or session bodies.
+- Constant no-store/no-referrer/CSP-restricted callback page, no external assets. Close listeners on success, cancellation, denial or expiry. Never echo provider content.
+- Fixed-origin admin transport, TLS validation, no redirects or environment proxy, bounded body/time and no automatic retry of writes. Keep this separate from read-only GET transport. A timeout/cancellation may occur after a remote write has taken effect.
+- Secret/session results go directly to reviewed owner-protected Windows storage, not stdout, MCP responses or screenshots. Private session IDs do not prove fresh bank consent.
+- Live provider discovery chooses bank and country only inside a separately approved owner workflow. No hardcoded Revolut country/account, and owner completes linking/SCA.
 
-## Offline verification
+## Verification boundaries
 
-`python -m unittest -v test_admin_consent` and `python -O -m unittest -v test_admin_consent`.
+Protocol unit tests establish only the cases they exercise, including state, replay, expiry, cancellation and callback validation. Receiver tests use synthetic loopback traffic; admin HTTP tests use mock transport. Synthetic integration tests do not prove browser TLS, Windows certificate behavior, Windows protected storage, provider acceptance, mobile handoff, real bank consent or live data.
 
-These tests cover request-body construction, randomized state, replay, expiry, cancellation, mismatched state, callback errors, duplicate/unknown parameters, wrong origin, encoding and bounds. They do not verify browser TLS, SSH topology, provider redirect acceptance, local OS trust, a real user flow or a bank session. Those are release gates, not work declared done.
+All those missing checks remain release gates. A local demo is not a live bank integration, and compiling prototypes does not authorize their use with real accounts.
+
+## OAuth URL exception
+
+The provider authorization redirect necessarily carries transient state and code parameters in the browser callback URL. This is the sole protocol-required exception to the ban on placing these values in URLs. Do not copy, retain, publish, log or reuse that callback URL. The relay must consume it privately and return only a constant page, never links carrying those parameters. Review browser-history and local observation exposure in the real Windows flow.
