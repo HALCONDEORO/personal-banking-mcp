@@ -1,0 +1,332 @@
+[
+ {
+  "name": "negative offset",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "offset": -1,
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "float offset",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "offset": 1.5,
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "string offset",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "offset": "0",
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "NaN limit",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "limit": "NaN",
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "negative limit",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "limit": -5,
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "zero limit",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "limit": 0,
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "enormous limit",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "limit": 999999999,
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "float limit",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "limit": 2.5,
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "string limit",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "limit": "10",
+   "start": "2026-01-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "inverted period",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2027-01-01",
+   "end": "2026-01-01"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "month 13",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-13-01",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "Feb 30",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-02-30",
+   "end": "2026-03-01"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "NaN date",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "NaN",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "Infinity end",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "end": "Infinity",
+   "start": "2026-01-01"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "datetime with tz as start",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-11-01T00:00:00Z",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "URL as start",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "https://evil.example/",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "foreign account",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "zz-not-in-fixtures-9"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "unknown tool call",
+  "tool": "make_payment",
+  "arguments": {
+   "to": "evil",
+   "amount": "1"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "generic http tool probe",
+  "tool": "http_request",
+  "arguments": {
+   "url": "http://169.254.169.254/"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "limit 100 allowed",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01",
+   "end": "2026-01-31",
+   "limit": 100
+  },
+  "expect_error": false
+ },
+ {
+  "name": "limit 101 rejected",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01",
+   "end": "2026-01-31",
+   "limit": 101
+  },
+  "expect_error": true
+ },
+ {
+  "name": "offset 10000 allowed boundary",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01",
+   "end": "2026-01-31",
+   "offset": 10000
+  },
+  "expect_error": false
+ },
+ {
+  "name": "offset 10001 rejected",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01",
+   "end": "2026-01-31",
+   "offset": 10001
+  },
+  "expect_error": true
+ },
+ {
+  "name": "366-day span allowed",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01",
+   "end": "2027-01-01"
+  },
+  "expect_error": false
+ },
+ {
+  "name": "367-day span rejected",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01",
+   "end": "2027-01-02"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "missing start",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "missing end",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "null start",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": null,
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "array start",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": [
+    "2026-01-01"
+   ],
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "numeric start",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": 20260101,
+   "end": "2026-01-31"
+  },
+  "expect_error": true
+ },
+ {
+  "name": "bool offset",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01",
+   "end": "2026-01-31",
+   "offset": true
+  },
+  "expect_error": true
+ },
+ {
+  "name": "bool limit",
+  "tool": "get_transactions",
+  "arguments": {
+   "account_id": "{KNOWN}",
+   "start": "2026-01-01",
+   "end": "2026-01-31",
+   "limit": false
+  },
+  "expect_error": true
+ }
+]
