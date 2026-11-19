@@ -8,7 +8,7 @@
 | Revolut direct API or business account | Not implemented | Do not provide any | Not part of the current personal synthetic demo |
 | Other banks/providers | Not implemented | None | No generic HTTP or arbitrary provider URL tool |
 
-A simulated normalizer or paginator is not provider support. The experimental modules, if present, operate on supplied synthetic payloads and injected transports, are not registered with MCP and have no concrete HTTP implementation. `provider_pagination_complete` does not mean `history_complete`.
+A simulated normalizer or paginator is not provider support. The experimental normalizer and paginator modules operate on supplied synthetic payloads and injected transports, are not registered with MCP and do not themselves implement HTTP. `provider_pagination_complete` does not mean `history_complete`.
 
 ## Configuration today
 
