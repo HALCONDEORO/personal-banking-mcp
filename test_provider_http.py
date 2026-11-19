@@ -1,4 +1,6 @@
 import unittest
+import asyncio
+import time
 import json
 import io
 import gzip
@@ -140,6 +142,37 @@ class HTTPTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(stream.getvalue(),'')
         finally:
             logging.lastResort=previous
+    async def test_total_deadline_defeats_slow_drip(self):
+        class SlowDrip(httpx.AsyncByteStream):
+            async def __aiter__(self):
+                for _ in range(100):
+                    await asyncio.sleep(0.005)
+                    yield b' ' * 8192
+        client=self.client(lambda r:httpx.Response(200,headers={'content-type':'application/json'},stream=SlowDrip()),total_seconds=0.02)
+        with self.assertRaisesRegex(FetchStopped,'^time_budget$'):
+            await client(self.request())
+        self.assertEqual(len(self.requests),1)
+    async def test_late_success_after_cancellation_rejected(self):
+        class CancelSuppressed(httpx.AsyncByteStream):
+            async def __aiter__(self):
+                try:await asyncio.sleep(1)
+                except asyncio.CancelledError:pass
+                yield b'{}'
+        client=self.client(lambda r:httpx.Response(200,headers={'content-type':'application/json'},stream=CancelSuppressed()),total_seconds=0.01)
+        with self.assertRaisesRegex(FetchStopped,'^time_budget$'):
+            await client(self.request())
+    async def test_slow_synchronous_token_rejected_before_http(self):
+        def token():
+            time.sleep(0.02)
+            return TOKEN
+        client=ReadOnlyHTTP(token,accounts=frozenset([ACCOUNT]),session=SESSION,total_seconds=0.001,
+                            _test_transport=httpx.MockTransport(lambda r:self.fail('Late token must not reach HTTP')))
+        with self.assertRaisesRegex(FetchStopped,'^time_budget$'):
+            await client(self.request())
+    async def test_total_timeout_configuration(self):
+        for seconds in [True,0,-1,5.1,float('nan'),float('inf'),'1']:
+            with self.subTest(seconds=seconds),self.assertRaisesRegex(ValueError,'^Invalid total time limit$'):
+                ReadOnlyHTTP(lambda:TOKEN,accounts=frozenset([ACCOUNT]),session=SESSION,total_seconds=seconds)
     async def test_import_no_network(self):
         # Construction does not create an HTTP client or request tokens.
         with patch('httpx.AsyncClient',side_effect=AssertionError('Unexpected client')):
