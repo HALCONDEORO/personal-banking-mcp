@@ -1,0 +1,11 @@
+# Provider doctor prototype
+
+Explicit opt-in diagnostic orchestration only, not a configured live diagnostic. No CLI, HTTP client, file/key/environment reads, bank endpoint choice, network defaults or MCP registration. Import/construction causes no external I/O. Operator invocation of `run_doctor` calls the supplied probe exactly once; callers must provide an already-authorized fixed-path GET probe. A Python callable is not a capability sandbox, so the wrapper cannot verify whether an injected callback secretly mutates or contacts other hosts. Do not accept arbitrary user/tool-supplied callables or wire this automatically to startup.
+
+The probe returns only ProbeResult(status). No provider body, URL, identifier, headers or private exception is carried into the diagnostic result. Static verdicts distinguish200 reachable,401 owner check required,403 denial without guessing why,429 stop,5xx unavailable,3xx refused and unexpected/failure/timeout. A success means one probe succeeded, not complete account readiness or history.403 is not automatically called revoked consent. No retry, consent renewal, linking, session deletion or other mutation occurs.
+
+Default3-second cooperative total timeout, maximum5. As with the HTTP adapter, cancellation-suppressing tasks and synchronous blocking code cannot be forcibly killed in-process; late success is rejected, not falsely accepted as readiness. Caller cancellation propagates rather than becoming a misleading healthy result. No date/time/private local settings appear in output.
+
+The wrapper handles only a status returned by its injected probe. Redirects must already be disabled by that probe; receiving302 is not proof a poorly implemented callback did not follow it first. This helper does not replace validation of the real transport, consent authority, private session scope or deployment environment.
+
+Tests:10 offline tests pass with normal and optimized Python. Cover fixed status mapping, once-only call, timeout, cancellation suppression, caller cancellation, invalid inputs/results and private-error suppression. No real provider calls were made. Provenance and MIT license for the adapted Tesco doctor pattern are included. Keep accumulated notices when integrating.
