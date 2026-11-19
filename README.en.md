@@ -28,7 +28,7 @@ A local, **read-only** MCP server for personal banking, fixture-first: it works 
 
 ## License
 
-MIT proposed in LICENSE. Copyright holder awaits confirmation before publication. See LICENCIAS.md and dependency-licenses.json.
+MIT in LICENSE. Copyright: Marco Antonio Tevar Asensio. See LICENCIAS.md and dependency-licenses.json.
 
 ## Current tool contract and limits
 
