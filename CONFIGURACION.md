@@ -45,3 +45,34 @@ Nombres orientativos (el servidor los fijará al implementarse; el `.env.example
 - [ ] `.gitignore` cubre `.env`, `*.pem`, `*.key` y el directorio de configuración local si estuviera dentro del repo.
 - [ ] El arranque sin variables sirve fixtures y ningún dato real.
 - [ ] Los logs de arranque no imprimen valores de las variables marcadas como secretas.
+
+## Ejecutar y probar el servidor sintético
+
+Python 3.10 o posterior. Desde la raíz del repositorio:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m pip check
+python -m unittest -v
+python -O -m unittest -v
+python test_server.py --demo
+```
+
+La demo inicia una sesión real de cliente/servidor MCP local por stdio e imprime datos inventados. No necesita credenciales bancarias. Para iniciar solo el servidor, ejecuta `python server.py`; espera un cliente MCP, no una orden interactiva en la terminal.
+
+Ejemplo de configuración del cliente. Sustituye ambas rutas absolutas por la ubicación de tu copia:
+
+```json
+{
+  "mcpServers": {
+    "personal-banking-demo": {
+      "command": "/absolute/path/personal-banking-mcp/.venv/bin/python",
+      "args": ["/absolute/path/personal-banking-mcp/server.py"]
+    }
+  }
+}
+```
+
+El ejemplo no necesita variables de entorno ni claves API. El punto de entrada del servidor funciona sin depender del directorio de trabajo del cliente.
