@@ -2,6 +2,7 @@
 import asyncio
 import json
 import sys
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 import server
@@ -34,7 +35,7 @@ class ReviewTests(unittest.TestCase):
 
     def test_protocol_rejects_coerced_pagination(self):
         async def run():
-            params = StdioServerParameters(command=sys.executable, args=['server.py'], env={})
+            params = StdioServerParameters(command=sys.executable, args=[str(Path(__file__).resolve().with_name('server.py'))], env={})
             async with stdio_client(params) as (read, write):
                 async with ClientSession(read, write) as client:
                     await client.initialize()
