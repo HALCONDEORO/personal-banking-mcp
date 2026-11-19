@@ -9,3 +9,6 @@ __pycache__/
 *.sqlite*
 secrets/
 sessions/
+
+# Node test harness local output
+node_modules/

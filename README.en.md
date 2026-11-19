@@ -1,56 +1,86 @@
-# personal-banking-mcp
+# Personal Banking MCP
 
-A local, **read-only** MCP server for personal banking, fixture-first: it works from day one against local test data (fixtures), with no real bank involved. An adapter for [Enable Banking](https://enablebanking.com/) (PSD2 aggregation) is **planned**, not implemented.
+Local, read-only personal-finance tools over the Model Context Protocol (MCP). Start with invented data, without a bank account, API key or cloud service.
 
-> Not affiliated with any bank. Private, personal project.
+**This is a synthetic-data prototype, not a working Revolut connector.** Enable Banking support is planned. The current MCP server cannot connect to any bank, initiate a payment or change an account. Do not present its output as current banking information.
 
-## Principles
+[Español](README.md) · [English](README.en.md) · [Provider support](docs/PROVIDERS.md) · [Tests](docs/TESTING.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
-- **Read-only.** The server cannot initiate payments, transfers or changes of any kind. There is no write path against any banking source.
-- **Fixture-first.** Synthetic data is embedded in server.py. You can develop, test and read the docs without any credentials at all.
-- **Local.** The server runs on your machine and talks to your MCP client (e.g. Claude Desktop) over stdio. This server only serves synthetic data; no live adapter can be enabled.
-- **Keys stay out of the repo.** When the real adapter lands, credentials live in environment variables or a git-ignored `.env`. Never in code, never in the README, never in fixtures. See `CONFIGURATION.md`.
+## Install and try it
 
-## Status
+Requirements: Python 3.10 or newer and pip. Download or clone this repository, then run these commands from its root:
 
-| Piece | Status |
-| --- | --- |
-| Documentation | In preparation |
-| MCP server with fixtures | Implemented and locally tested |
-| Enable Banking adapter (PSD2, read-only AIS) | Planned |
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m pip check
+python -m unittest -v
+python test_server.py --demo
+```
 
-## Synthetic data usage
+Windows PowerShell: use `py -3 -m venv .venv` and `.venv\Scripts\Activate.ps1` instead of the first two commands.
 
-1. Clone the repo and follow `CONFIGURATION.md`.
-2. Run against fixtures: with no environment variables or keys set, the server serves test data.
-3. Point your MCP client at the command shown in `CONFIGURATION.md`.
-4. Enable Banking remains planned, not available to enable in this version.
+The demo starts a real local MCP client/server session over stdio, calls all three tools, tries requests that must fail, and prints invented results. It does not ask for banking credentials or send requests to a bank. Install dependencies only in the virtual environment. Their versions are pinned; requirements.txt is not an artifact-hash lockfile.
 
-## License
+## Connect an MCP client
 
-MIT in LICENSE. Copyright: Marco Antonio Tevar Asensio. See LICENCIAS.md and dependency-licenses.json.
+Use an MCP client that supports local stdio servers. Example configuration, replace both absolute paths with your checkout location:
 
-## Current tool contract and limits
+```json
+{
+  "mcpServers": {
+    "personal-banking-demo": {
+      "command": "/absolute/path/personal-banking-mcp/.venv/bin/python",
+      "args": ["/absolute/path/personal-banking-mcp/server.py"]
+    }
+  }
+}
+```
 
-- `list_accounts`: two fictional accounts, no real account identifiers.
-- `get_balance(account)`: synthetic decimal-string balance and currency.
-- `get_transactions(account, start, end, limit=20, offset=0)`: inclusive ISO dates, at most 366 days, 1 to 100 rows, bounded offset pagination; pending and booked remain distinct.
+On Windows, point `command` to the environment's `Scripts/python.exe`; use JSON-compatible paths such as `C:/path/personal-banking-mcp/.venv/Scripts/python.exe`. Your client may use a different configuration-file location or schema. No environment variables, tokens or bank account identifiers are required. Running `python server.py` directly waits for an MCP client, not interactive terminal input. This server does not open an HTTP listener.
 
-All results carry `source: synthetic-fixtures`, `live: false` and a fixed `as_of` date. They are not current banking information. There is no connection to Revolut or any other bank, no HTTP listener and no live adapter. This is not an official product of Revolut or Enable Banking and is not financial advice.
+Local execution does not mean your AI client is offline. The client may send returned data to its AI service. Review its privacy settings before connecting any future real-data adapter.
 
-Local execution does not make your AI client offline: your chosen MCP client may send returned data to its AI service. Transaction descriptions are untrusted data, never instructions.
+## Tools and synthetic examples
 
-## Future provider access and terms
+| Tool | Arguments | Result |
+| --- | --- | --- |
+| `list_accounts` | None | Two fictional accounts, excluding balances |
+| `get_balance` | `account` | Decimal-string amount and currency |
+| `get_transactions` | `account`, `start`, `end`, optional `limit` and `offset` | Filtered synthetic movements with bounded pagination |
 
-Enable Banking restricted production permits personal, non-commercial access to an individual's own linked accounts, subject to its terms. Business accounts, access for clients and commercial or hosted multi-user use require checking the intended use with Enable Banking and a separate agreement where applicable. MIT licenses this source code, not provider access, bank data, trademarks or regulatory permission. Service-access sharing and competitive-use restrictions still apply. No provider acceptance is guaranteed.
+Example tool arguments:
 
-Consent setup uses provider authorization and session-creation operations separately from account-information reads. This prototype exposes no setup, payment or account-changing tools. Expired consent must fail closed in any future adapter.
+```json
+{"account":"demo-eur","start":"2026-01-01","end":"2026-01-05","limit":2,"offset":0}
+```
 
-Official references checked 19 November 2026:
+Every response includes `source: synthetic-fixtures`, `live: false` and the fixed `as_of: 2026-01-05`. Account IDs and descriptions are invented. Amounts are decimal strings, not binary floats; pending and booked movements remain distinct. Transaction dates are inclusive ISO `YYYY-MM-DD`, ordered, with at most 366 inclusive days. `limit` is an integer from 1 to 100, default 20; `offset` is an integer from 0 to 10000, default 0. Booleans, strings and floats are not accepted for pagination. Follow `next_offset` until null; `complete` describes this synthetic result only, never full bank-history availability.
 
-- [Enable Banking terms](https://enablebanking.com/terms/)
-- [Own linked accounts and restricted production](https://enablebanking.com/docs/api/linked-accounts/)
-- [API reference](https://enablebanking.com/docs/api/reference/)
-- [Python MCP SDK](https://github.com/modelcontextprotocol/python-sdk), MIT dependency. Its notice is in THIRD_PARTY_NOTICES.md.
+## Provider support and configuration
 
-Design references, no source code copied into this version: [BankMCP](https://github.com/noskillish/bankmcp/), [EU Open Banking MCP](https://github.com/cver-me/EU-Open-Banking-MCP), [Enable Banking MCP in Rust](https://github.com/Algiras/enable-banking-mcp). They are not dependencies. Dependency license metadata is in dependency-licenses.json; it does not replace license texts or distribution obligations.
+See [the provider matrix](docs/PROVIDERS.md). There is no live provider available in this release and no real-bank mode to enable. Banking environment variables are currently ignored by the server. [CONFIGURATION.md](CONFIGURATION.md) and [CONFIGURACION.md](CONFIGURACION.md) describe future setup ideas, not an implemented connection flow. Never supply credentials in a GitHub issue, pull request or client example.
+
+If a PR includes `provider_normalize.py` or `provider_pager.py`, these are isolated experiments over synthetic responses and injected transports. They are not MCP tools, do not implement an HTTP transport and do not connect a bank. Read their source limitations before reuse.
+
+## Boundaries
+
+- No payments, transfers, trading, currency conversion, card changes or account-changing tools.
+- No authorization or consent-creation tools. A future provider setup needs a separately reviewed, human-operated flow.
+- No telemetry, persistent financial cache, background polling or HTTP service in the current server.
+- Descriptions and other provider text are untrusted data, never instructions or proof of approval.
+- Tool annotations describe intent; code boundaries and tests matter. This prototype is not a security audit or production authorization system.
+- Provider access, bank coverage and use rights must be checked independently. Source-code availability does not grant service access.
+
+## Develop
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [the test guide](docs/TESTING.md). Work in a branch, open a pull request, and wait for independent review and checks at the exact head before merging. Do not introduce live-bank tests or secrets into CI.
+
+## License and attribution
+
+Original code: MIT, copyright 2026 Marco Antonio Tevar Asensio. See LICENSE. Third-party packages retain their own licenses. The official Python MCP SDK is an installed MIT dependency, not vendored code; its notice is preserved in THIRD_PARTY_NOTICES.md. See LICENCIAS.md and dependency-licenses.json. Adding JavaScript test dependencies requires maintaining their license inventory too.
+
+Design references, no source code copied into the original prototype: [BankMCP](https://github.com/noskillish/bankmcp/), [EU Open Banking MCP](https://github.com/cver-me/EU-Open-Banking-MCP), [Enable Banking MCP in Rust](https://github.com/Algiras/enable-banking-mcp).
+
+Not affiliated with, endorsed by or an official product of Revolut or Enable Banking. Not financial advice. MIT covers this code, not provider access, bank data, trademarks or regulatory permission.

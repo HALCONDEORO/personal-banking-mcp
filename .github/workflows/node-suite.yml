@@ -1,0 +1,41 @@
+name: node-suite
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Additional layer ONLY: property / fuzz / e2e harness driving the product
+# over stdio MCP. The product's own Python CI (ci.yml, unittest) stays as is.
+# Read-only token, no secrets, actions pinned by commit SHA.
+permissions:
+  contents: read
+
+env:
+  SERVER_CMD: python3
+  SERVER_ARGS: server.py
+
+jobs:
+  node-suite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # actions/checkout v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # actions/setup-python v7.1.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # actions/setup-node v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: python -m pip install -r requirements.txt
+      - run: npm ci
+      - name: property tests (product via SERVER_CMD)
+        run: node tests/properties.mjs
+        env:
+          FC_SEED: ${{ github.run_id }}
+      - name: fuzz corpus (product via SERVER_CMD)
+        run: node tests/fuzz.mjs
+      - name: e2e MCP client check (product via SERVER_CMD)
+        run: node e2e/mcp-client-check.mjs
