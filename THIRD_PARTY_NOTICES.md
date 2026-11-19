@@ -70,3 +70,16 @@ Other installed packages retain their respective licenses. Full dependency revie
 The test module is original project code. The repository's existing MIT license is not replaced by this package. Apache obligations apply to the adapted file and any downstream modifications of it.
 
 Lifecycle additions dated 2026-11-19: `remaining_seconds` and `closed` expose only attempt lifetime and closure, never state or code. These modifications to `admin_consent.py` remain Apache-2.0.
+
+## Studio Saelix Finance paths
+
+- Upstream: https://github.com/Studio-Saelix/finance-mcp
+- Pinned commit: `044401cea1a141e7f40e388528b3beb536b6c31b`
+- Source: `src/plaid_mcp/paths.py`
+- Source URL: https://github.com/Studio-Saelix/finance-mcp/blob/044401cea1a141e7f40e388528b3beb536b6c31b/src/plaid_mcp/paths.py
+- License: MIT, full original text in `LICENSES/Studio-Saelix-MIT.txt`.
+- Original copyright: Copyright (c) 2026 plaid-mcp contributors.
+- Adapted file: `private_store.py`, MIT.
+- Modifications, 2026-11-19, copyright Marco Antonio Tevar Asensio: preserve owner-only directory/file checks from the upstream paths design, but replace check-then-open path operations with POSIX descriptor-relative traversal and O_NOFOLLOW at every component. Reject insecure permissions rather than silently changing existing files. Add hardlink rejection, regular-file checks, bounded reads/writes, private exclusive temporary files, atomic replacement, fsync and cleanup. Remove application-specific paths, XDG defaults and value-bearing exceptions. No Plaid credentials, database or other upstream application modules are imported.
+
+Tests and integration notes are original project material. Keep the project's existing root MIT license; retain this upstream license and attribution with the adaptation.
