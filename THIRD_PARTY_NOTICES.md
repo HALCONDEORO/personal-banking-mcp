@@ -83,3 +83,16 @@ Lifecycle additions dated 2026-11-19: `remaining_seconds` and `closed` expose on
 - Modifications, 2026-11-19, copyright Marco Antonio Tevar Asensio: preserve owner-only directory/file checks from the upstream paths design, but replace check-then-open path operations with POSIX descriptor-relative traversal and O_NOFOLLOW at every component. Reject insecure permissions rather than silently changing existing files. Add hardlink rejection, regular-file checks, bounded reads/writes, private exclusive temporary files, atomic replacement, fsync and cleanup. Remove application-specific paths, XDG defaults and value-bearing exceptions. No Plaid credentials, database or other upstream application modules are imported.
 
 Tests and integration notes are original project material. Keep the project's existing root MIT license; retain this upstream license and attribution with the adaptation.
+
+## BankMCP session/account interfaces
+
+- Repository: https://github.com/noskillish/bankmcp
+- Commit: `12b2a8a30b7c8b7d46dd1d0dd44cebde2f89be6a`
+- Source file: `src/enablebanking.ts`, Session and AccountResource interface shapes.
+- Source URL: https://github.com/noskillish/bankmcp/blob/12b2a8a30b7c8b7d46dd1d0dd44cebde2f89be6a/src/enablebanking.ts
+- License: MIT, original full text in `LICENSES/bankmcp-MIT.txt`.
+- Original copyright: Copyright (c) 2026 Nils Smed.
+- Adapted file: `provider_session.py`.
+- Modifications dated 2026-11-19, copyright Marco Antonio Tevar Asensio: port the session/account interface shape to an offline Python validation boundary, cross-check official provider response schemas, drop all account extras, enforce personal mode and selected-bank binding, strict private UUID allowlists, bounded/unique accounts and expiry no later than the approved request. Add constant private repr, explicit internal ID handoff and a summary that does not claim current consent. No upstream networking, JWT caching, OAuth server, password handling, webhook, payment, attestation or session mutation code is used.
+
+The tests and notes are original project material under the project's MIT license. Keep this attribution and upstream MIT license with the adapted module. The project root license is not replaced.
