@@ -118,3 +118,17 @@ The serial queue, interval and injected-clock pattern in provider_load.py is ada
 Pinned source: https://raw.githubusercontent.com/HALCONDEORO/tesco-ie-grocery-mcp/08db94c5230ab74d9a573415442e22a5961e5c69/src/load-control.mjs
 
 Changes: rewritten in Python asyncio, bounded active/waiting job count, per-workflow call slots and monotonic deadline, cancellation propagation, generic errors and synthetic tests. No upstream challenge detection, fetch API or error-message interpolation is included. The full MIT license is retained in LICENSES/tesco-ie-grocery-mcp-MIT.txt. Prior attributions are unchanged. This adaptation does not establish a bank quota policy.
+
+
+## transaction_analytics.py category and search adaptation
+
+Category precedence and grouped summaries adapt guille-near/openbanking-mcp commit d61e3ad67b60aa848d96887fd4d06dc3fefbd749, MIT, Copyright(c)2026 Guille Pérez. Pinned sources:
+https://raw.githubusercontent.com/guille-near/openbanking-mcp/d61e3ad67b60aa848d96887fd4d06dc3fefbd749/src/finmcp/analytics/categories.py
+https://raw.githubusercontent.com/guille-near/openbanking-mcp/d61e3ad67b60aa848d96887fd4d06dc3fefbd749/src/finmcp/analytics/summaries.py
+Full text: LICENSES/guille-near-openbanking-MIT.txt.
+
+Literal text-search pattern adapts elcukro/bank-mcp commit c6abad503b1ecec47e80108ef8d0c614da0f4de5, MIT, Copyright(c)2026 bank-mcp contributors. Pinned source:
+https://raw.githubusercontent.com/elcukro/bank-mcp/c6abad503b1ecec47e80108ef8d0c614da0f4de5/src/tools/search-transactions.ts
+Full text: LICENSES/elcukro-bank-mcp-MIT.txt.
+
+Changes: Python pure bounded supplied-row functions, exact Decimal strings instead of float, explicit currency/status/date provenance and incomplete-history scope. No SQL, DB, fetch, cron, automatic categories or token/config handling. Previous notices and license files remain unchanged.
