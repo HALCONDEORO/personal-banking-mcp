@@ -14,6 +14,7 @@ import re
 import time
 from typing import Awaitable, Callable
 from uuid import UUID
+from async_boundary import _await_owned
 from provider_normalize import InvalidProviderData, normalize_page
 
 HOST = 'https://api.enablebanking.com'
@@ -125,7 +126,7 @@ async def fetch_simulated_transactions(
         if remaining <= 0:
             raise FetchStopped('time_budget')
         try:
-            response = await asyncio.wait_for(transport(request), timeout=remaining)
+            response = await _await_owned(transport(request), remaining)
         except asyncio.TimeoutError:
             raise FetchStopped('time_budget') from None
         except Exception:
