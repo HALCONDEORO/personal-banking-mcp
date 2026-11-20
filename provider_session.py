@@ -25,7 +25,7 @@ def _uuid(value):
 
 def _time(value):
     if (type(value) is not str or len(value)>40
-            or re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})',value) is None):reject()
+            or re.fullmatch(r'[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])',value) is None):reject()
     try:
         result=datetime.fromisoformat(value.replace('Z','+00:00'))
         if result.tzinfo is None or result.utcoffset() is None:reject()
@@ -33,8 +33,10 @@ def _time(value):
     except (ValueError,OverflowError):reject()
 
 def _now(value):
-    if not isinstance(value,datetime) or value.tzinfo is None or value.utcoffset() is None:reject()
-    return value.astimezone(timezone.utc)
+    try:
+        if not isinstance(value,datetime) or value.tzinfo is None or value.utcoffset() is None:reject()
+        return value.astimezone(timezone.utc)
+    except (ValueError,OverflowError):reject()
 
 class PrivateSession:
     """Sanitized private envelope, never serialize through repr/asdict.
