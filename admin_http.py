@@ -9,7 +9,7 @@ DELETE, general URL/method API, config/key reads, logging or retry.
 import asyncio,json,re,time
 import httpx
 from urllib.parse import urlsplit,parse_qsl
-from provider_http import suppress_provider_diagnostics
+from provider_http import suppress_provider_diagnostics, _await_request
 from provider_pager import _strict_response_json
 
 HOST='https://api.enablebanking.com'
@@ -93,7 +93,7 @@ class AdminAISHTTP:
         else:stop()
         deadline=time.monotonic()+self._seconds
         try:
-            result=await asyncio.wait_for(self._request(path,body,deadline),self._seconds)
+            result=await _await_request(self._request(path,body,deadline),self._seconds)
             if time.monotonic()>=deadline:stop()
             return result
         except Exception:stop()

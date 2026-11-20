@@ -99,6 +99,31 @@ def suppress_provider_diagnostics():
             handler.addFilter(_NoProviderDiagnostics())
 
 
+def _retrieve_request_result(task):
+    # Also retrieve a result after repeated caller cancellation interrupts drain.
+    if not task.cancelled():
+        task.exception()
+
+
+async def _await_request(coro, seconds):
+    """Keep caller cancellation/timeout separate from transport cleanup failures.
+
+    Drain cancellation cooperatively, as wait_for already does. This is not a
+    hard wall-clock bound for a transport that refuses to finish cleanup.
+    """
+    task = asyncio.create_task(coro)
+    task.add_done_callback(_retrieve_request_result)
+    try:
+        return await asyncio.wait_for(asyncio.shield(task), timeout=seconds)
+    except (asyncio.CancelledError, asyncio.TimeoutError):
+        task.cancel()
+        try:
+            await task
+        except (Exception, asyncio.CancelledError):
+            pass
+        raise
+
+
 class ReadOnlyHTTP:
     """Narrow provider client. Constructing it performs no I/O.
 
@@ -130,7 +155,7 @@ class ReadOnlyHTTP:
         self._validate(request)
         deadline = time.monotonic() + self._total_seconds
         try:
-            result = await asyncio.wait_for(self._read(request, deadline), timeout=self._total_seconds)
+            result = await _await_request(self._read(request, deadline), self._total_seconds)
         except asyncio.TimeoutError:
             raise FetchStopped('time_budget') from None
         # A transport or cleanup routine can suppress cancellation. Never accept
