@@ -112,8 +112,11 @@ class PrivateStore:
                 info=os.stat(name,dir_fd=self._fd,follow_symlinks=False)
                 _private(info)
             except FileNotFoundError:pass
-            temp='.new-'+secrets.token_hex(16)
-            fd=os.open(temp,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW|os.O_CLOEXEC,0o600,dir_fd=self._fd)
+            candidate='.new-'+secrets.token_hex(16)
+            fd=os.open(candidate,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW|os.O_CLOEXEC,0o600,dir_fd=self._fd)
+            # Cleanup owns this name only after exclusive creation succeeds.
+            # A collision belongs to an existing writer, never this call.
+            temp=candidate
             # Honour restrictive umask without accepting group/world access.
             os.fchmod(fd,0o600);_private(os.fstat(fd))
             view=memoryview(data)
