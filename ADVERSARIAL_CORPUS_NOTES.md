@@ -1,6 +1,6 @@
 # Declarative banking boundary regression corpus
 
-The JSON in `fuzz-corpus/banking-session-reads.json` contains 77 synthetic cases
+The JSON in `tests/data/banking-session-reads.json` contains 77 synthetic cases
 created against `a4208261cfc5ee604eea287f0eb626d040d85862`. The only input-file change is an added final newline from the repository
 editor. All JSON values and 77 cases are unchanged. Integrated file SHA256:
 `a8aaa7b43ce0d7c2f5e8abe9bbc3994677bd68d4bbcbd4ba88c6b08b5c7c16f4`.
@@ -66,3 +66,8 @@ the isolated wrapper and the actual simulated pager's revocation-between-pages
 case. That wrapper is still disconnected from the MCP and not an atomic
 consent guarantee. Neither suite authorizes a real read or changes activation
 gates. Independent review and CI apply to each exact remote candidate.
+
+The Python-envelope corpus is outside the Node MCP fuzz input directory. The
+Node runner expects arrays of MCP-tool cases in its own fuzz-corpus directory;
+placing this different schema there breaks that suite. Existing MCP fuzz
+inputs and the Node runner are unchanged. Both suites must pass together.
