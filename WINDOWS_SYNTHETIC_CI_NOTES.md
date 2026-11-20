@@ -5,6 +5,18 @@ existing portable Python surface and the synthetic MCP stdio demo. It installs
 the same pinned requirements as Linux and uses the same pinned checkout and
 Python setup actions, with read-only repository permissions and no secrets.
 
+Both PR and main-push triggers filter to Python source/tests, requirements.txt
+and this workflow. Documentation-only edits do not launch this Windows job.
+Concurrency is grouped by workflow/ref with cancel-in-progress, so a superseded
+run on the same PR or main is cancelled. Distinct PRs can still run concurrently;
+this is not a global spending cap. Do not request manual reruns in bulk or raise
+the owner's existing Actions budget. This public repository uses the standard
+windows-latest runner, not a larger paid runner; recheck billing policy and
+visibility if either changes. GitHub's current runner reference documents free
+standard hosted-runner use for public repositories:
+https://docs.github.com/en/actions/reference/runners/github-hosted-runners
+
+
 `run_portable_tests.py` lists its modules explicitly. It runs both normally and
 with `-O`; import failures, failures, an empty suite or any skipped test make the
 step fail. New test modules do not silently join this Windows gate. Review and
