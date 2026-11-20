@@ -38,7 +38,11 @@ They verify both owned tasks are joined even on close failure, while refusing to
 claim listener closure in the failure case. These five use a lifecycle fake, not
 a real socket or Windows runner.
 
-Both modes pass 12/12 on Linux Python 3.12.16. These tests join the actual existing
+Both modes pass 12/12 on Linux Python 3.12.16. The Linux fixture-check workflow
+runs this suite explicitly with `run_supervisor_tests.py`, normally and with
+`-O`. The runner fails on errors, failures, any skip or fewer than 12 executed
+tests; root discovery alone does not include this subdirectory. This gate is
+Linux lifecycle evidence, not Windows or .NET process qualification. These tests join the actual existing
 Python receiver with a synthetic async runner, not a launched .NET executable.
 The separate .NET TLS harness still supplies its actual TLS/Python callback join.
 A Windows-specific process launcher, private channel and full owner setup remain
