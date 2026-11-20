@@ -2,8 +2,10 @@
 # Copyright (c) 2026 Marco Antonio Tevar Asensio
 """Explicit loopback-only callback receiver. No TLS/SSH/provider or autostart.
 
-Private backend prototype, not an MCP tool. Only a reviewed owner-authenticated
-SSH tunnel may reach it. It expects a fixed request rebuilt by a TLS relay.
+Private local-hop prototype, not an MCP tool. The selected design keeps the
+future TLS relay and admin workflow on the same Windows laptop, without SSH.
+It expects a fixed request rebuilt by a separately reviewed TLS relay. Loopback
+and a fixed Host are not authentication against competing local processes.
 """
 import asyncio
 from callback_framing import parse_relay_request,response_bytes,CallbackRejected,MAX_REQUEST

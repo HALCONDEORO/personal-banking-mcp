@@ -21,8 +21,9 @@ ORIGIN='https://localhost:8765'
 def parse_relay_request(raw: bytes) -> str:
     """Return a PRIVATE callback URL for ConsentAttempt.consume_callback.
 
-    Only a dedicated loopback-only listener behind the owner's authenticated
-    SSH tunnel may call this parser. HTTP Host is not authentication.
+    Input is a rebuilt request on the selected same-laptop loopback hop, not
+    browser-facing HTTP. No SSH tunnel is part of the selected topology. The
+    fixed Host and loopback bind are not local-process authentication.
     """
     if type(raw) is not bytes or not 1<=len(raw)<=MAX_REQUEST:reject()
     if not raw.endswith(b'\r\n\r\n') or b'\r\n\r\n' in raw[:-4]:reject()
