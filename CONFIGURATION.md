@@ -8,6 +8,10 @@ Follow [the README quick start](README.md#quick-start). Do not set bank credenti
 
 Use a local stdio MCP client with absolute Python/server paths as the README describes. No account, key, provider application or cloud service is needed. The client may send tool results to its AI provider; local execution alone does not make that client offline.
 
+For the current personal-use registration and consent boundaries, read the
+[setup readiness checklist](PERSONAL_SETUP_READINESS.md). It is preparation,
+not an activation procedure.
+
 ## Planned real connection
 
 See [final goals and release gates](ROADMAP.md). A real connection requires a separately reviewed implementation and setup, including provider eligibility, an approved application registration, a validated redirect, owner-completed linking/consent and a trusted read-only transport. The provider modules are experimental and disconnected from MCP.
