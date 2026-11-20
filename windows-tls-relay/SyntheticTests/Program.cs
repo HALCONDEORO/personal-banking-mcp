@@ -88,10 +88,14 @@ internal static class Program
     {
         using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(3));
         using var tcp = new TcpClient(AddressFamily.InterNetwork);
+        Console.WriteLine("STEP: client-connect");
         await tcp.ConnectAsync(IPAddress.Loopback, port, limit.Token);
         using var tls = new SslStream(tcp.GetStream()); // No permissive validation callback.
+        Console.WriteLine("STEP: client-handshake");
         await tls.AuthenticateAsClientAsync(Options(cert, host), limit.Token);
+        Console.WriteLine("STEP: client-write");
         await tls.WriteAsync(request, limit.Token);
+        Console.WriteLine("STEP: client-response");
         using var output = new MemoryStream();
         var buffer = new byte[1024];
         while (true)
@@ -108,7 +112,9 @@ internal static class Program
     }
     private static async Task NetworkTests()
     {
+        Console.WriteLine("STEP: network-certificate");
         using var cert = Certificate();
+        Console.WriteLine("STEP: network-listeners");
         var backend = new TcpListener(IPAddress.Loopback, 0); backend.Start();
         int backendPort = ((IPEndPoint)backend.LocalEndpoint).Port;
         using var relay = new LocalTlsRelay(cert, 0, backendPort, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(4));
@@ -116,16 +122,22 @@ internal static class Program
         var backendTask = Task.Run(async () =>
         {
             using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            Console.WriteLine("STEP: backend-accept");
             using var tcp = await backend.AcceptTcpClientAsync(limit.Token);
             using var stream = tcp.GetStream();
             using var output = new MemoryStream(); await stream.CopyToAsync(output, limit.Token);
             string expected = "GET " + Target + " HTTP/1.1\r\nHost: 127.0.0.1:8766\r\nConnection: close\r\n\r\n";
+            Console.WriteLine("STEP: backend-request-check");
             Check(Encoding.ASCII.GetString(output.ToArray()) == expected);
+            Console.WriteLine("STEP: backend-response");
             await stream.WriteAsync(LocalTlsRelay.Response(true), limit.Token);
         });
         byte[] response = await Client(port, cert, Request(headers: "Host: localhost:8765\r\nCookie: discarded=synthetic\r\n"));
+        Console.WriteLine("STEP: network-join");
         await Task.WhenAll(run, backendTask); backend.Stop();
+        Console.WriteLine("STEP: network-response-check");
         Check(response.SequenceEqual(LocalTlsRelay.Response(true))); Check(relay.BoundPort == 0);
+        Console.WriteLine("STEP: network-cleanup-check");
         using var probe = new TcpClient();
         try { await probe.ConnectAsync(IPAddress.Loopback, port); throw new Exception("Listener remained open"); }
         catch (SocketException) { passed++; }
