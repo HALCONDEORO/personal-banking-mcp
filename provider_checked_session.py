@@ -5,6 +5,7 @@ import asyncio
 from datetime import datetime, timezone
 import re
 from provider_pager import ReadRequest, FakeResponse, HOST, _strict_response_json
+from async_boundary import _await_owned
 from provider_session import PrivateSession, _time, _uuid
 
 
@@ -90,7 +91,7 @@ class CheckedSessionRead:
             validate_read_request(request, accounts=frozenset(accounts), session=self._session.transport_ids(now=self._now())[0])
             loop = asyncio.get_running_loop()
             deadline = loop.time() + self._seconds
-            result = await asyncio.wait_for(self._workflow(request, deadline), timeout=self._seconds)
+            result = await _await_owned(self._workflow(request, deadline), self._seconds)
             if loop.time() >= deadline:
                 _reject()
             return result
