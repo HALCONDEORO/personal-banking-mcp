@@ -34,6 +34,45 @@ def application_jwt(application_id: str, private_key: bytes, *, now: int | None 
         raise ValueError('Application key configuration invalid') from None
 
 
+def validate_read_request(request, *, accounts, session):
+    if not isinstance(request, ReadRequest) or request.host != HOST:
+        raise FetchStopped('operation_denied')
+    account_match = _ACCOUNT_PATH.fullmatch(request.path)
+    session_match = _SESSION_PATH.fullmatch(request.path)
+    if account_match:
+        if account_match[1] not in accounts:
+            raise FetchStopped('operation_denied')
+    elif not session_match or session_match[1] != session:
+        raise FetchStopped('operation_denied')
+    if not isinstance(request.query, tuple) or len(request.query) > 5:
+        raise FetchStopped('operation_denied')
+    seen=set()
+    for entry in request.query:
+        if not isinstance(entry,tuple) or len(entry)!=2:
+            raise FetchStopped('operation_denied')
+        key,value=entry
+        if not isinstance(key,str) or key in seen or not isinstance(value,str) or len(value)>2048 or any(ord(c)<32 for c in value):
+            raise FetchStopped('operation_denied')
+        seen.add(key)
+        if not account_match or account_match[2]!='transactions' or key not in {'date_from','date_to','continuation_key','transaction_status','strategy'}:
+            raise FetchStopped('operation_denied')
+        if key=='strategy' and value != 'longest':
+            raise FetchStopped('operation_denied')
+        if key=='transaction_status' and value not in {'BOOK','PDNG'}:
+            raise FetchStopped('operation_denied')
+    # Dates and date-span bounds are enforced by the pager before transport.
+    # This transport also validates date syntax to protect independent use.
+    from datetime import date
+    for key,value in request.query:
+        if key in {'date_from','date_to'}:
+            try:
+                if not re.fullmatch(r'[0-9]{4}-[0-9]{2}-[0-9]{2}',value): raise ValueError
+                date.fromisoformat(value)
+            except ValueError:
+                raise FetchStopped('operation_denied') from None
+
+
+
 class _NoProviderDiagnostics(logging.Filter):
     def filter(self, record):
         return not (record.name in {'httpx', 'httpcore'} or record.name.startswith(('httpx.', 'httpcore.')))
@@ -85,41 +124,7 @@ class ReadOnlyHTTP:
         suppress_provider_diagnostics()
 
     def _validate(self, request):
-        if not isinstance(request, ReadRequest) or request.host != HOST:
-            raise FetchStopped('operation_denied')
-        account_match = _ACCOUNT_PATH.fullmatch(request.path)
-        session_match = _SESSION_PATH.fullmatch(request.path)
-        if account_match:
-            if account_match[1] not in self._accounts:
-                raise FetchStopped('operation_denied')
-        elif not session_match or session_match[1] != self._session:
-            raise FetchStopped('operation_denied')
-        if not isinstance(request.query, tuple) or len(request.query) > 5:
-            raise FetchStopped('operation_denied')
-        seen=set()
-        for entry in request.query:
-            if not isinstance(entry,tuple) or len(entry)!=2:
-                raise FetchStopped('operation_denied')
-            key,value=entry
-            if not isinstance(key,str) or key in seen or not isinstance(value,str) or len(value)>2048 or any(ord(c)<32 for c in value):
-                raise FetchStopped('operation_denied')
-            seen.add(key)
-            if not account_match or account_match[2]!='transactions' or key not in {'date_from','date_to','continuation_key','transaction_status','strategy'}:
-                raise FetchStopped('operation_denied')
-            if key=='strategy' and value != 'longest':
-                raise FetchStopped('operation_denied')
-            if key=='transaction_status' and value not in {'BOOK','PDNG'}:
-                raise FetchStopped('operation_denied')
-        # Dates and date-span bounds are enforced by the pager before transport.
-        # This transport also validates date syntax to protect independent use.
-        from datetime import date
-        for key,value in request.query:
-            if key in {'date_from','date_to'}:
-                try:
-                    if not re.fullmatch(r'[0-9]{4}-[0-9]{2}-[0-9]{2}',value): raise ValueError
-                    date.fromisoformat(value)
-                except ValueError:
-                    raise FetchStopped('operation_denied') from None
+        validate_read_request(request, accounts=self._accounts, session=self._session)
 
     async def __call__(self, request: ReadRequest) -> FakeResponse:
         self._validate(request)
