@@ -98,6 +98,21 @@ See [the selected callback design](LOCAL_CALLBACK_DESIGN.md),
 reference: https://enablebanking.com/docs/api/reference/ . Protocol documentation
 is not approval of this local design or of any particular bank account.
 
+## Fixed signer adapter (synthetic scope)
+
+`signer_seam.py` provides `FixedSigner`, a fixed in-process adapter between a
+reviewed zero-argument backend and `ReadOnlyHTTP(token=...)`. It checks that the
+returned string has only the fixed header (RS256, kid equal to the application id)
+and the four fixed claims (issuer, audience, iat, exp, lifetime at most 300 seconds,
+not expired). It allows one call at a time, no retry, no cache, a single generic
+error with no chained backend error, and no token in repr or pickle. It has no CLI,
+listener, stdout or file surface and cannot be used as a general signing service.
+
+It is a shape check only. It does not verify the signature, prove Windows key custody,
+authenticate the backend, or show that the provider accepts the token. No Windows
+backend exists yet. `test_signer_seam.py` uses only synthetic keys and
+`httpx.MockTransport`.
+
 ## Static signer review, separate from the repository runtime
 
 The separately supplied WindowsApiToken.cs candidate and stage1 Program.cs
