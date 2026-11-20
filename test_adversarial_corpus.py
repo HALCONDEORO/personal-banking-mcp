@@ -11,7 +11,7 @@ import provider_session as session
 import provider_pager as pager
 import provider_http as http
 import httpx
-CORPUS=json.loads((Path(__file__).parent/'fuzz-corpus'/'banking-session-reads.json').read_text())
+CORPUS=json.loads((Path(__file__).parent/'tests'/'data'/'banking-session-reads.json').read_text())
 NOW=datetime(2026,11,20,6,tzinfo=timezone.utc);UNTIL=NOW+timedelta(hours=1)
 SID='11111111-1111-4111-8111-111111111111';AID='22222222-2222-4222-8222-222222222222';OTHER='33333333-3333-4333-8333-333333333333'
 R='https://localhost:8765/callback'
