@@ -110,8 +110,8 @@ async def protocol_smoke(no_network=False, elsewhere=False):
     trace=[]
     parameters=StdioServerParameters(command=sys.executable,args=[str(SERVER_PATH)],cwd=str(SERVER_PATH.parent.parent) if elsewhere else None,env={})
     if no_network:
-        parameters=StdioServerParameters(command=sys.executable,args=['-c',
-            "import sys,runpy; sys.addaudithook(lambda event,args: (_ for _ in ()).throw(PermissionError('Network forbidden in fixture mode')) if event in {'socket.connect','socket.bind','socket.getaddrinfo'} else None); runpy.run_path(sys.argv[1],run_name='__main__')", str(SERVER_PATH)],env={})
+        parameters=StdioServerParameters(command=sys.executable,args=[
+            str(SERVER_PATH.with_name('fixture_audit_launcher.py')), str(SERVER_PATH)],env={})
     with tempfile.TemporaryFile(mode='w+') as stderr:
         trace = await _run_protocol(parameters, trace, stderr)
         stderr.seek(0)
@@ -148,6 +148,24 @@ async def _run_protocol(parameters, trace, stderr):
     return trace
 
 class ProtocolTests(unittest.TestCase):
+    def test_audit_launcher_denies_network_from_fixture_code(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target=Path(directory)/'audit_probe.py'
+            target.write_text(
+                "import socket\n"
+                "blocked=0\n"
+                "def address_call(method):\n"
+                " with socket.socket() as sock:getattr(sock,method)(('127.0.0.1',9))\n"
+                "for action in (lambda:socket.getaddrinfo('example.invalid',443),"
+                "lambda:address_call('connect'),lambda:address_call('bind')):\n"
+                " try:action()\n"
+                " except PermissionError:blocked+=1\n"
+                "if blocked!=3:raise RuntimeError('Network audit boundary failed')\n",
+                encoding='utf-8')
+            result=subprocess.run([sys.executable,str(SERVER_PATH.with_name('fixture_audit_launcher.py')),str(target)],capture_output=True,text=True,timeout=10)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertEqual(result.stdout,'')
+
     def test_real_stdio_client(self):
         trace=asyncio.run(protocol_smoke())
         self.assertEqual(len(trace),10)
