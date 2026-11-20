@@ -67,3 +67,7 @@ Record the exact commit, environment, commands, seed, skips and result. Distingu
 Use the project's installed Python environment for both unittest and SERVER_CMD. Missing mcp imports or an unset SERVER_CMD are setup failures, not passing tests or proof of a product defect. Preserve their output, correct the environment and rerun the unchanged candidate before reporting success.
 
 Do not commit node_modules, virtual environments, credentials, real financial output or temporary canary copies. When changing dependencies, repeat the license/advisory review. A clean advisory scan is time-limited evidence, not a security audit. Synthetic tests do not establish provider availability, regulatory permission, multi-user safety or live financial correctness.
+
+## JSON number boundary
+
+`test_provider_json_numbers.py` covers shared strict decoding across the pager, checked session and separate admin response. It rejects nested exponent overflow as well as literal nonfinite values, with no retry, partial page result or account request after a refused session check. Finite extras and decimal-string money semantics are retained. All transports are synthetic. See [the finite-number notes](../PROVIDER_JSON_NUMBER_NOTES.md).
