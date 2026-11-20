@@ -1,8 +1,19 @@
 name: Windows synthetic checks
 on:
   pull_request:
+    paths:
+      - '**/*.py'
+      - requirements.txt
+      - .github/workflows/windows-synthetic.yml
   push:
     branches: [main]
+    paths:
+      - '**/*.py'
+      - requirements.txt
+      - .github/workflows/windows-synthetic.yml
+concurrency:
+  group: windows-synthetic-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
