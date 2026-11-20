@@ -78,6 +78,28 @@ class ShapeTests(unittest.TestCase):
                 self.assertEqual(str(caught.exception), 'Signer unavailable')
                 self.assertIsNone(caught.exception.__cause__)
 
+    def test_duplicate_keys_rejected_in_header_and_claims(self):
+        def raw(head, body):
+            enc = lambda x: base64.urlsafe_b64encode(x.encode()).rstrip(b'=').decode()
+            return enc(head) + '.' + enc(body) + '.c2ln'
+        h = '{"alg":"RS256","kid":"%s"}' % APP
+        c = '{"iss":"enablebanking.com","aud":"api.enablebanking.com","iat":%d,"exp":%d}' % (NOW, NOW + 60)
+        self.assertEqual(signer(lambda: raw(h, c))(), raw(h, c))  # control: accepted
+        cases = {
+            'alg none then RS256': ('{"alg":"none","alg":"RS256","kid":"%s"}' % APP, c),
+            'alg identical': ('{"alg":"RS256","alg":"RS256","kid":"%s"}' % APP, c),
+            'kid identical': ('{"alg":"RS256","kid":"%s","kid":"%s"}' % (APP, APP), c),
+            'iss evil then real': (h, c.replace('{', '{"iss":"evil.example",', 1)),
+            'iss identical': (h, c.replace('{', '{"iss":"enablebanking.com",', 1)),
+            'exp identical': (h, c[:-1] + ',"exp":%d}' % (NOW + 60)),
+            'escaped duplicate': (h, c[:-1] + ',"\\u0069ss":"evil.example"}'),
+            'typ identical': ('{"alg":"RS256","kid":"%s","typ":"JWT","typ":"JWT"}' % APP, c),
+        }
+        for name, (head, body) in cases.items():
+            with self.subTest(name):
+                with self.assertRaises(SignerSeamError):
+                    signer(lambda t=raw(head, body): t)()
+
     def test_nonfinite_json_constants_rejected(self):
         raw = '{"iss":"enablebanking.com","aud":"api.enablebanking.com","iat":1,"exp":NaN}'
         tok = b64({'alg': 'RS256', 'kid': APP}) + '.' + base64.urlsafe_b64encode(raw.encode()).rstrip(b'=').decode() + '.c2ln'
