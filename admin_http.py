@@ -28,7 +28,7 @@ class PrivateReply:
 
 
 def _auth_body(body):
-    from datetime import datetime
+    from provider_session import _time
     if type(body) is not dict or set(body)!={'access','aspsp','state','redirect_url','psu_type'}:stop()
     if body['psu_type']!='personal' or body['redirect_url']!='https://localhost:8765/callback':stop()
     if type(body['state']) is not str or re.fullmatch(r'[A-Za-z0-9_-]{43}',body['state']) is None:stop()
@@ -40,8 +40,7 @@ def _auth_body(body):
     value=access['valid_until']
     if type(value) is not str or not 20<=len(value)<=40:stop()
     try:
-        expiry=datetime.fromisoformat(value.replace('Z','+00:00'))
-        if expiry.tzinfo is None or expiry.utcoffset() is None:stop()
+        _time(value)
     except (ValueError,OverflowError):stop()
     # Builder owns approved duration/current time. No extension is introduced.
 
