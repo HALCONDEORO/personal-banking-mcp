@@ -1,8 +1,7 @@
-"""Windows protected store tests.
+"""Windows protected store logic tests (any OS, fake backend, no skips).
 
-FakeBackend tests run anywhere and cover logic only: they do NOT show real
-DPAPI behaviour. Tests in RealDpapi run only on native Windows (os.name == 'nt')
-and use synthetic bytes.
+These cover logic only. They do NOT show real DPAPI behaviour. Real DPAPI is
+exercised by test_windows_native_store.py on native Windows.
 """
 import os, tempfile, unittest, hashlib
 from pathlib import Path
@@ -25,12 +24,6 @@ class Logic(unittest.TestCase):
         return WindowsPrivateStore(str(self.path), _backend=FakeBackend(), _platform='nt') if os.name != 'nt' else WindowsPrivateStore(str(self.path), _backend=FakeBackend())
     def test_refuses_non_windows_platform(self):
         with self.assertRaises(Err): WindowsPrivateStore(str(self.path), _backend=FakeBackend(), _platform='posix')
-    def test_backend_refuses_off_windows(self):
-        if os.name != 'nt':
-            with self.assertRaises(Err): DpapiBackend()
-    @unittest.skipIf(os.name == 'nt', 'POSIX path shape check')
-    def test_posix_style_path_rejected_as_windows_path(self):
-        with self.assertRaises(Err): self.open()
     def test_name_allowlist_and_bounds(self):
         s = self.new()
         for bad in ['../x.pem', 'A.pem', 'a.txt', 'a/b.json', '', 'a.pem\x00']:
@@ -42,7 +35,7 @@ class Logic(unittest.TestCase):
         # Bypasses the constructor (drive-letter path rules) so logic runs on POSIX CI.
         s = object.__new__(WindowsPrivateStore)
         self.path.mkdir(exist_ok=True)
-        s._root = self.path; s._backend = FakeBackend()
+        s._root = self.path; s._chain = [self.path.parent, self.path]; s._backend = FakeBackend()
         return s
     def test_roundtrip_replace_no_temps_and_no_plaintext(self):
         s = self.new()
@@ -62,12 +55,6 @@ class Logic(unittest.TestCase):
         with self.assertRaises(Err): s.read('a.json')
         (self.path / 'a.json').write_bytes(b'garbage')
         with self.assertRaises(Err): s.read('a.json')
-    @unittest.skipIf(os.name == 'nt', 'symlink creation needs privileges on Windows')
-    def test_symlink_file_rejected(self):
-        s = self.new(); t = self.path.parent / 'target'; t.write_bytes(b'x'); os.symlink(t, self.path / 'a.json')
-        with self.assertRaises(Err): s.read('a.json')
-        with self.assertRaises(Err): s.write('a.json', b'y')
-        self.assertEqual(t.read_bytes(), b'x')
     def test_hardlink_rejected(self):
         s = self.new(); s.write('a.json', b'x'); os.link(self.path / 'a.json', self.path.parent / 'alias')
         with self.assertRaises(Err): s.read('a.json')
@@ -86,37 +73,23 @@ class Logic(unittest.TestCase):
     def test_repr_has_no_path(self):
         self.assertNotIn(str(self.path), repr(self.new()))
 
-@unittest.skipUnless(os.name == 'nt', 'native Windows only')
-class RealDpapi(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(); self.path = Path(self.tmp.name) / 'priv'
-    def tearDown(self): self.tmp.cleanup()
-    def test_roundtrip_blob_is_not_plaintext(self):
-        with WindowsPrivateStore(str(self.path)) as s:
-            data = b'synthetic-not-a-secret-0123456789'
-            s.write('session.json', data)
-            self.assertEqual(s.read('session.json'), data)
-            self.assertNotIn(data, (self.path / 'session.json').read_bytes())
-            s.write('session.json', b'second'); self.assertEqual(s.read('session.json'), b'second')
-    def test_blob_bound_to_name(self):
-        with WindowsPrivateStore(str(self.path)) as s:
-            s.write('a.json', b'synthetic')
-            (self.path / 'b.json').write_bytes((self.path / 'a.json').read_bytes())
-            with self.assertRaises(Err): s.read('b.json')
-    def test_tamper_rejected(self):
-        with WindowsPrivateStore(str(self.path)) as s:
-            s.write('a.json', b'synthetic')
-            raw = bytearray((self.path / 'a.json').read_bytes()); raw[-1] ^= 1
-            (self.path / 'a.json').write_bytes(bytes(raw))
+if os.name != 'nt':
+    # Defined only off Windows, so a Windows run has no skips.
+    class PosixOnly(Logic):
+        def test_backend_refuses_off_windows(self):
+            with self.assertRaises(Err): DpapiBackend()
+        def test_posix_style_path_rejected_as_windows_path(self):
+            with self.assertRaises(Err): self.open()
+        def test_ancestor_replaced_by_symlink_after_construction_rejected(self):
+            s = self.new(); s.write('a.json', b'x')
+            moved = self.path.parent / 'moved'; os.rename(self.path.parent / 'priv', moved)
+            os.symlink(moved, self.path.parent / 'priv')
             with self.assertRaises(Err): s.read('a.json')
-    def test_relative_unc_and_traversal_paths_rejected(self):
-        for bad in ['relative', r'\\server\share\x', r'\\?\C:\x', str(self.path / '..' / 'x')]:
-            with self.assertRaises(Err): WindowsPrivateStore(bad)
-    def test_junction_rejected(self):
-        import subprocess
-        real = Path(self.tmp.name) / 'real'; real.mkdir(); link = Path(self.tmp.name) / 'link'
-        subprocess.run(['cmd', '/c', 'mklink', '/J', str(link), str(real)], check=True, capture_output=True)
-        with self.assertRaises(Err): WindowsPrivateStore(str(link))
-        with self.assertRaises(Err): WindowsPrivateStore(str(link / 'sub'))
+            with self.assertRaises(Err): s.write('a.json', b'y')
+        def test_symlink_file_rejected(self):
+            s = self.new(); t = self.path.parent / 'target'; t.write_bytes(b'x'); os.symlink(t, self.path / 'a.json')
+            with self.assertRaises(Err): s.read('a.json')
+            with self.assertRaises(Err): s.write('a.json', b'y')
+            self.assertEqual(t.read_bytes(), b'x')
 
 if __name__ == '__main__': unittest.main()
