@@ -1,0 +1,535 @@
+{
+  "schema_version": 1,
+  "target_commit": "a4208261cfc5ee604eea287f0eb626d040d85862",
+  "scope": "offline synthetic only; no real consent, credentials, account or network",
+  "cases": [
+    {
+      "id": "session-001",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": null
+    },
+    {
+      "id": "session-002",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": false
+    },
+    {
+      "id": "session-003",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": 0
+    },
+    {
+      "id": "session-004",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": ""
+    },
+    {
+      "id": "session-005",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": "000000000000000000000000000000000000"
+    },
+    {
+      "id": "session-006",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": "11111111111141118111111111111111"
+    },
+    {
+      "id": "session-007",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": "{11111111-1111-4111-8111-111111111111}"
+    },
+    {
+      "id": "session-008",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": "../../sessions"
+    },
+    {
+      "id": "session-009",
+      "kind": "session",
+      "path": [
+        "session_id"
+      ],
+      "value": "11111111-1111-4111-8111-111111111111\n"
+    },
+    {
+      "id": "session-010",
+      "kind": "session",
+      "path": [
+        "psu_type"
+      ],
+      "value": "business"
+    },
+    {
+      "id": "session-011",
+      "kind": "session",
+      "path": [
+        "psu_type"
+      ],
+      "value": true
+    },
+    {
+      "id": "session-012",
+      "kind": "session",
+      "path": [
+        "psu_type"
+      ],
+      "value": null
+    },
+    {
+      "id": "session-013",
+      "kind": "session",
+      "path": [
+        "aspsp",
+        "name"
+      ],
+      "value": "Other bank"
+    },
+    {
+      "id": "session-014",
+      "kind": "session",
+      "path": [
+        "aspsp",
+        "name"
+      ],
+      "value": "Synthetic bank "
+    },
+    {
+      "id": "session-015",
+      "kind": "session",
+      "path": [
+        "aspsp",
+        "country"
+      ],
+      "value": "GB"
+    },
+    {
+      "id": "session-016",
+      "kind": "session",
+      "path": [
+        "aspsp",
+        "country"
+      ],
+      "value": "ie"
+    },
+    {
+      "id": "session-017",
+      "kind": "session",
+      "path": [
+        "accounts"
+      ],
+      "value": []
+    },
+    {
+      "id": "session-018",
+      "kind": "session",
+      "path": [
+        "accounts"
+      ],
+      "value": {}
+    },
+    {
+      "id": "session-019",
+      "kind": "session",
+      "path": [
+        "accounts"
+      ],
+      "value": [
+        {}
+      ]
+    },
+    {
+      "id": "session-020",
+      "kind": "session",
+      "path": [
+        "accounts"
+      ],
+      "value": [
+        {
+          "uid": "00000000-0000-0000-0000-000000000000"
+        }
+      ]
+    },
+    {
+      "id": "session-021",
+      "kind": "session",
+      "path": [
+        "access",
+        "valid_until"
+      ],
+      "value": "2026-11-20T06:00:00Z"
+    },
+    {
+      "id": "session-022",
+      "kind": "session",
+      "path": [
+        "access",
+        "valid_until"
+      ],
+      "value": "2026-11-20T07:00:01Z"
+    },
+    {
+      "id": "session-023",
+      "kind": "session",
+      "path": [
+        "access",
+        "valid_until"
+      ],
+      "value": "2026-11-20T07:00:00"
+    },
+    {
+      "id": "session-024",
+      "kind": "session",
+      "path": [
+        "access",
+        "valid_until"
+      ],
+      "value": "2026-11-20T07:00:00Z\n"
+    },
+    {
+      "id": "consent-025",
+      "kind": "consent",
+      "params": {
+        "state": "wrong"
+      }
+    },
+    {
+      "id": "consent-026",
+      "kind": "consent",
+      "params": {
+        "state": ""
+      }
+    },
+    {
+      "id": "consent-027",
+      "kind": "consent",
+      "params": {
+        "state": "\u00e9"
+      }
+    },
+    {
+      "id": "consent-028",
+      "kind": "consent",
+      "params": {
+        "code": ""
+      }
+    },
+    {
+      "id": "consent-029",
+      "kind": "consent",
+      "params": {
+        "code": " "
+      }
+    },
+    {
+      "id": "consent-030",
+      "kind": "consent",
+      "params": {
+        "code": "\u0000"
+      }
+    },
+    {
+      "id": "consent-031",
+      "kind": "consent",
+      "params": {
+        "code": "\u00e9"
+      }
+    },
+    {
+      "id": "consent-032",
+      "kind": "consent",
+      "params": {
+        "code": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "id": "consent-033",
+      "kind": "consent",
+      "params": {
+        "code": "x",
+        "error": "denied"
+      }
+    },
+    {
+      "id": "consent-034",
+      "kind": "consent",
+      "origin": "http://localhost:8765/callback"
+    },
+    {
+      "id": "consent-035",
+      "kind": "consent",
+      "origin": "https://127.0.0.1:8765/callback"
+    },
+    {
+      "id": "consent-036",
+      "kind": "consent",
+      "origin": "https://localhost:8765/callback/"
+    },
+    {
+      "id": "consent-037",
+      "kind": "consent",
+      "origin": "https://localhost:8765@elsewhere.invalid/callback"
+    },
+    {
+      "id": "consent-038",
+      "kind": "consent",
+      "suffix": "&code=other"
+    },
+    {
+      "id": "consent-039",
+      "kind": "consent",
+      "suffix": "&state=other"
+    },
+    {
+      "id": "consent-040",
+      "kind": "consent",
+      "suffix": "&extra=x"
+    },
+    {
+      "id": "consent-041",
+      "kind": "consent",
+      "suffix": "&code=%ZZ"
+    },
+    {
+      "id": "consent-042",
+      "kind": "consent",
+      "suffix": "&code=%FF"
+    },
+    {
+      "id": "consent-043",
+      "kind": "consent",
+      "advance": 300,
+      "burns": true
+    },
+    {
+      "id": "read_denied-044",
+      "kind": "read_denied",
+      "path": "/accounts/33333333-3333-4333-8333-333333333333/transactions"
+    },
+    {
+      "id": "read_denied-045",
+      "kind": "read_denied",
+      "path": "/sessions/33333333-3333-4333-8333-333333333333"
+    },
+    {
+      "id": "read_denied-046",
+      "kind": "read_denied",
+      "path": "/accounts/22222222-2222-4222-8222-222222222222/payments"
+    },
+    {
+      "id": "read_denied-047",
+      "kind": "read_denied",
+      "path": "/auth"
+    },
+    {
+      "id": "read_denied-048",
+      "kind": "read_denied",
+      "path": "/accounts/22222222-2222-4222-8222-222222222222/transactions#x"
+    },
+    {
+      "id": "read_denied-049",
+      "kind": "read_denied",
+      "path": "/accounts/../transactions"
+    },
+    {
+      "id": "read_denied-050",
+      "kind": "read_denied",
+      "host": "http://api.enablebanking.com"
+    },
+    {
+      "id": "read_denied-051",
+      "kind": "read_denied",
+      "host": "https://api.enablebanking.com.evil.invalid"
+    },
+    {
+      "id": "read_denied-052",
+      "kind": "read_denied",
+      "host": "https://user@api.enablebanking.com"
+    },
+    {
+      "id": "read_denied-053",
+      "kind": "read_denied",
+      "host": "https://api.enablebanking.com:443"
+    },
+    {
+      "id": "read_denied-054",
+      "kind": "read_denied",
+      "query": [
+        [
+          "date_from",
+          "2026-02-30"
+        ]
+      ]
+    },
+    {
+      "id": "read_denied-055",
+      "kind": "read_denied",
+      "query": [
+        [
+          "date_from",
+          "2026-01-01"
+        ],
+        [
+          "date_from",
+          "2026-01-02"
+        ]
+      ]
+    },
+    {
+      "id": "read_denied-056",
+      "kind": "read_denied",
+      "query": [
+        [
+          "strategy",
+          "shortest"
+        ]
+      ]
+    },
+    {
+      "id": "read_denied-057",
+      "kind": "read_denied",
+      "query": [
+        [
+          "transaction_status",
+          "ALL"
+        ]
+      ]
+    },
+    {
+      "id": "read_denied-058",
+      "kind": "read_denied",
+      "query": [
+        [
+          "next",
+          "https://elsewhere.invalid"
+        ]
+      ]
+    },
+    {
+      "id": "read_denied-059",
+      "kind": "read_denied",
+      "query": [
+        [
+          "continuation_key",
+          "a\u0000b"
+        ]
+      ]
+    },
+    {
+      "id": "status-060",
+      "kind": "status",
+      "status": 301,
+      "expected": "unexpected_status"
+    },
+    {
+      "id": "status-061",
+      "kind": "status",
+      "status": 302,
+      "expected": "unexpected_status"
+    },
+    {
+      "id": "status-062",
+      "kind": "status",
+      "status": 401,
+      "expected": "reconnect_required"
+    },
+    {
+      "id": "status-063",
+      "kind": "status",
+      "status": 403,
+      "expected": "access_denied"
+    },
+    {
+      "id": "status-064",
+      "kind": "status",
+      "status": 422,
+      "expected": "request_rejected"
+    },
+    {
+      "id": "status-065",
+      "kind": "status",
+      "status": 429,
+      "expected": "rate_limited"
+    },
+    {
+      "id": "status-066",
+      "kind": "status",
+      "status": 500,
+      "expected": "provider_unavailable"
+    },
+    {
+      "id": "status-067",
+      "kind": "status",
+      "status": 503,
+      "expected": "unexpected_status"
+    },
+    {
+      "id": "lifecycle-068",
+      "kind": "lifecycle"
+    },
+    {
+      "id": "cursor-069",
+      "kind": "cursor",
+      "value": "https://elsewhere.invalid/path?synthetic=1"
+    },
+    {
+      "id": "cursor-070",
+      "kind": "cursor",
+      "value": "../../sessions/other"
+    },
+    {
+      "id": "cursor-071",
+      "kind": "cursor",
+      "value": "%2f%2felsewhere.invalid"
+    },
+    {
+      "id": "cursor-072",
+      "kind": "cursor",
+      "value": "opaque-cursor"
+    },
+    {
+      "id": "consent_positive-073",
+      "kind": "consent_positive"
+    },
+    {
+      "id": "consent_positive-074",
+      "kind": "consent_positive",
+      "wrong_first": true
+    },
+    {
+      "id": "session_positive-075",
+      "kind": "session_positive"
+    },
+    {
+      "id": "read_positive-076",
+      "kind": "read_positive"
+    },
+    {
+      "id": "cancel-077",
+      "kind": "cancel"
+    }
+  ]
+}
