@@ -10,6 +10,7 @@ helper never retries and never passes provider bodies/exceptions to its output.
 """
 import asyncio
 from dataclasses import dataclass
+from async_boundary import _await_owned
 from provider_pager import FetchStopped
 
 @dataclass(frozen=True,repr=False)
@@ -45,7 +46,7 @@ async def run_doctor(probe,*,seconds=3.0):
         raise ValueError('Invalid diagnostic configuration') from None
     loop=asyncio.get_running_loop();deadline=loop.time()+seconds
     try:
-        result=await asyncio.wait_for(probe(),timeout=seconds)
+        result=await _await_owned(probe(),seconds)
         if loop.time()>=deadline:return _verdict('timeout')
         if type(result) is not ProbeResult or type(result.status) is not int:
             return _verdict('unexpected_response')
