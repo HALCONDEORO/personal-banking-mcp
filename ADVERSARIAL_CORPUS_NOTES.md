@@ -1,14 +1,17 @@
 # Declarative banking boundary regression corpus
 
 The JSON in `fuzz-corpus/banking-session-reads.json` contains 77 synthetic cases
-created against `a4208261cfc5ee604eea287f0eb626d040d85862`. Its original bytes are
-preserved. SHA256:
-`45bd0f8543011a4132eceb8c0dd4cfa49be2b700deeb6e1f1a7f94de902addb7`.
+created against `a4208261cfc5ee604eea287f0eb626d040d85862`. The only input-file change is an added final newline from the repository
+editor. All JSON values and 77 cases are unchanged. Integrated file SHA256:
+`a8aaa7b43ce0d7c2f5e8abe9bbc3994677bd68d4bbcbd4ba88c6b08b5c7c16f4`.
 
 This integration was run against the separate main checkout at
 `e8d7ed7298bca52f06c8fa547db5138b5e832384`, including the session-checked read
 composition. The original `target_commit` in the JSON identifies the corpus's
 creation baseline, not the current checkout or an approval of later changes.
+
+Original pre-newline file SHA256:
+`45bd0f8543011a4132eceb8c0dd4cfa49be2b700deeb6e1f1a7f94de902addb7`.
 
 ## Automatic execution
 
