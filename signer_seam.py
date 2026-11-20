@@ -33,7 +33,7 @@ class SignerSeamError(Exception):
 
 def _segment(text: str) -> dict:
     raw = base64.urlsafe_b64decode(text + '=' * (-len(text) % 4))
-    value = json.loads(raw, parse_constant=_reject_constant)
+    value = json.loads(raw, parse_constant=_reject_constant, object_pairs_hook=_no_duplicates)
     if type(value) is not dict:
         raise ValueError
     return value
@@ -41,6 +41,15 @@ def _segment(text: str) -> dict:
 
 def _reject_constant(_):
     raise ValueError
+
+
+def _no_duplicates(pairs):
+    # json.loads keeps the last duplicate silently. Reject any repeated key,
+    # including identical repeats and escaped spellings of the same key.
+    keys = [key for key, _ in pairs]
+    if len(set(keys)) != len(keys):
+        raise ValueError
+    return dict(pairs)
 
 
 def _int(value) -> bool:
