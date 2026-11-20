@@ -213,7 +213,9 @@ internal static class Program
     {
         try
         {
+            Console.WriteLine("PHASE: parser");
             ParserTests();
+            Console.WriteLine("PHASE: leaf-policy");
             using (var valid = Certificate()) { LocalTlsRelay.ValidateLeaf(valid); passed++; }
             using (var ca = Certificate(ca:true)) Reject(() => LocalTlsRelay.ValidateLeaf(ca));
             using (var san = Certificate(dns:"other.invalid")) Reject(() => LocalTlsRelay.ValidateLeaf(san));
@@ -222,7 +224,14 @@ internal static class Program
             using (var expired = Certificate(expired:true)) Reject(() => LocalTlsRelay.ValidateLeaf(expired));
             Reject(() => LocalTlsRelay.FromCurrentUserStore("invalid"));
             if (!OperatingSystem.IsWindows()) Reject(() => LocalTlsRelay.FromCurrentUserStore(new string('A',40)));
-            await NetworkTests(); await RejectionTests(); await PythonJoinTest(); await PythonJoinTest(true);
+            Console.WriteLine("PHASE: network");
+            await NetworkTests();
+            Console.WriteLine("PHASE: rejection");
+            await RejectionTests();
+            Console.WriteLine("PHASE: python-join-success");
+            await PythonJoinTest();
+            Console.WriteLine("PHASE: python-join-denial");
+            await PythonJoinTest(true);
             Console.WriteLine($"PASS: {passed} synthetic assertions. No bank/provider/store changes."); return 0;
         }
         catch { Console.Error.WriteLine("FAIL: synthetic TLS harness. Private diagnostics suppressed."); return 1; }
