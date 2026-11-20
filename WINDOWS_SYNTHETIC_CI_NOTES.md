@@ -34,11 +34,27 @@ Local pre-publication evidence: Python 3.12.16 on Linux, normal and optimized,
 378 methods OK in each run, no skips. The Windows workflow is the source for the
 actual Windows result after publication. Do not label the local run Windows.
 
+A first Windows run deliberately failed rather than skipping defects. It exposed
+early timer cancellation issues fixed separately in PR40, plus the networking
+audit test's startup order. The revised no-network launcher constructs event-loop
+infrastructure before installing its audit hook, then imports and runs the real
+server entry point under the hook. Windows may require local sockets to construct
+its event loop. No destination is exempted after the hook starts. A regression
+checks that fixture code cannot resolve, connect or bind. This is not an OS
+sandbox and does not claim the pre-hook infrastructure made no local socket call.
+
+The runner includes the PR40 early-dispatch regressions. After that dependency
+and the launcher change, local Linux normal/optimized runs select 381 methods,
+zero skips. Only a green Windows run at the final PR head supplies Windows
+execution evidence; prior failing runs and local Linux passes do not.
+
 A green Windows run establishes only the exercised behavior on that hosted
 runner. It does not test the owner's laptop, Windows key storage, a signing
 bridge, persistent ACLs, TLS certificate trust, provider redirect acceptance,
 real consent or a bank read. It does not enable a live mode. No real account,
 private certificate, key, JWT, code or banking credential belongs in this CI.
 
-Rollback: remove this workflow, explicit runner and note. The existing Linux and
-Node workflows are not changed by this PR.
+Rollback: remove this workflow, explicit runner and note, and restore the old
+inline audit test launcher. Product cancellation fixes belong to PR40 and are
+not rolled back with this CI change. Existing Linux and Node workflow definitions
+are untouched.
