@@ -109,7 +109,9 @@ class CheckedSessionRead:
         async with self._lock:
             in_time()
             _, (sid, accounts) = self._scope()
-            response = await self._transport(ReadRequest(HOST, '/sessions/' + sid, ()))
+            response = await _await_owned(
+                self._transport(ReadRequest(HOST, '/sessions/' + sid, ())),
+                max(0, deadline - asyncio.get_running_loop().time()))
             in_time()
             now, _ = self._scope()
             if (type(response) is not FakeResponse or type(response.status) is not int
@@ -122,7 +124,9 @@ class CheckedSessionRead:
             if now >= until:
                 _reject()
             in_time()
-            result = await self._transport(request)
+            result = await _await_owned(
+                self._transport(request),
+                max(0, deadline - asyncio.get_running_loop().time()))
             in_time()
             now, _ = self._scope()
             if now >= until:
