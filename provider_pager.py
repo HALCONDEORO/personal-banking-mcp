@@ -9,6 +9,7 @@ import asyncio
 from dataclasses import dataclass
 from datetime import date
 import json
+import math
 import re
 import time
 from typing import Awaitable, Callable
@@ -50,6 +51,24 @@ def _strict_object(pairs):
 
 def _no_constant(_):
     raise FetchStopped('invalid_response')
+
+
+def _finite_float(text):
+    value = float(text)
+    if not math.isfinite(value):
+        raise FetchStopped('invalid_response')
+    return value
+
+
+def _strict_response_json(raw):
+    """Reject duplicate keys and every nonfinite number, including exponents.
+
+    parse_constant alone does not catch JSON `1e999`, which Python converts to inf.
+    Provider amount fields remain decimal strings validated by normalization;
+    finite numeric extras are accepted and discarded under the existing schema.
+    """
+    return json.loads(raw, object_pairs_hook=_strict_object,
+                      parse_constant=_no_constant, parse_float=_finite_float)
 
 
 def _check_limits(limits):
@@ -122,7 +141,7 @@ async def fetch_simulated_transactions(
         if total_bytes > limits.bytes_total:
             raise FetchStopped('byte_budget')
         try:
-            payload = json.loads(response.body, object_pairs_hook=_strict_object, parse_constant=_no_constant)
+            payload = _strict_response_json(response.body)
             page = normalize_page(payload)
         except (ValueError, UnicodeError, RecursionError):
             raise FetchStopped('invalid_response') from None

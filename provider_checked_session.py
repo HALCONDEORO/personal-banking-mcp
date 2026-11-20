@@ -3,9 +3,8 @@
 """Isolated session-check composition. No network defaults, MCP or setup effects."""
 import asyncio
 from datetime import datetime, timezone
-import json
 import re
-from provider_pager import ReadRequest, FakeResponse, HOST, _strict_object, _no_constant
+from provider_pager import ReadRequest, FakeResponse, HOST, _strict_response_json
 from provider_session import PrivateSession, _time, _uuid
 
 
@@ -116,7 +115,7 @@ class CheckedSessionRead:
                     or response.status != 200 or type(response.body) is not bytes
                     or len(response.body) > 65536):
                 _reject()
-            payload = json.loads(response.body, object_pairs_hook=_strict_object, parse_constant=_no_constant)
+            payload = _strict_response_json(response.body)
             until = validate_session_check(payload, expected_accounts=accounts, bank=self._bank, country=self._country, now=now)
             now, _ = self._scope()
             if now >= until:

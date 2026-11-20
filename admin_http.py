@@ -10,7 +10,7 @@ import asyncio,json,re,time
 import httpx
 from urllib.parse import urlsplit,parse_qsl
 from provider_http import suppress_provider_diagnostics
-from provider_pager import _strict_object,_no_constant
+from provider_pager import _strict_response_json
 
 HOST='https://api.enablebanking.com'
 MAX_BYTES=131072
@@ -124,7 +124,7 @@ class AdminAISHTTP:
                         if len(data)+len(chunk)>MAX_BYTES:stop()
                         data.extend(chunk)
                     check()
-                    result=json.loads(data,object_pairs_hook=_strict_object,parse_constant=_no_constant)
+                    result=_strict_response_json(data)
                     if type(result) is not dict:stop()
                     return result
         except Exception:stop()
