@@ -71,3 +71,6 @@ Do not commit node_modules, virtual environments, credentials, real financial ou
 ## JSON number boundary
 
 `test_provider_json_numbers.py` covers shared strict decoding across the pager, checked session and separate admin response. It rejects nested exponent overflow as well as literal nonfinite values, with no retry, partial page result or account request after a refused session check. Finite extras and decimal-string money semantics are retained. All transports are synthetic. See [the finite-number notes](../PROVIDER_JSON_NUMBER_NOTES.md).
+
+
+Session timezone offset and UTC-boundary regressions: `python -m unittest test_provider_session_offsets`. See `SESSION_OFFSET_NOTES.md` for scope and remaining limits.
