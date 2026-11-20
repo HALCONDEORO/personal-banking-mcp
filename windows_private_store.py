@@ -8,7 +8,9 @@ admin selects an absolute directory outside the repository. Files hold only
 DPAPI blobs. Same-user hostile processes can call DPAPI as that user and are
 outside this boundary, as is anything with the user's logon secret.
 
-This module refuses non-Windows platforms. Linux unit tests inject a fake
+Path components are revalidated (no symlink/junction) on each operation, but the
+check is not atomic with the file operation; the directory tree is assumed not to
+be mutated concurrently by a hostile process. This module refuses non-Windows platforms. Linux unit tests inject a fake
 backend and exercise logic only; they say nothing about real DPAPI. Real
 DPAPI is exercised only by tests that run on native Windows.
 """
@@ -103,12 +105,17 @@ class WindowsPrivateStore:
 
     def __init__(self, path, *, _backend=None, _platform=None):
         self._root = None
+        self._chain = ()
         self._backend = None
         try:
             if (_platform or os.name) != 'nt':
                 reject()
             raw = os.fspath(path)
             if type(raw) is not str or '\x00' in raw or not os.path.isabs(raw):
+                reject()
+            # Validate the raw text: pathlib would silently drop '.' components.
+            raw_parts = re.split(r'[\\/]', raw)
+            if any(c in ('', '.', '..') for c in raw_parts[1:]) or re.fullmatch(r'[A-Za-z]:', raw_parts[0]) is None:
                 reject()
             p = Path(raw)
             if not p.drive or p.drive.startswith('\\\\') or raw.startswith(('\\\\', '//')):
@@ -117,11 +124,14 @@ class WindowsPrivateStore:
             if not parts or any(c in ('', '.', '..') or ':' in c or c.endswith(('.', ' ')) for c in parts):
                 reject()
             cur = Path(p.anchor)
+            chain = [cur]
             for i, comp in enumerate(parts):
                 cur = cur / comp
                 if i == len(parts) - 1 and not cur.exists():
                     os.mkdir(cur)
                 _plain_dir(cur)
+                chain.append(cur)
+            self._chain = chain
             self._root = cur
             self._backend = _backend if _backend is not None else DpapiBackend()
         except (OSError, TypeError, ValueError):
@@ -138,12 +148,16 @@ class WindowsPrivateStore:
 
     def close(self):
         self._root = None
+        self._chain = ()
         self._backend = None
 
     def _active(self):
         if self._root is None:
             reject()
-        _plain_dir(self._root)
+        # Revalidate every path component on each use (not atomic: a swap between
+        # this check and the file operation is not prevented).
+        for part in self._chain:
+            _plain_dir(part)
 
     def _file(self, name):
         return self._root / _name(name)
