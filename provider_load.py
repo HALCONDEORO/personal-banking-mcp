@@ -9,6 +9,7 @@ import asyncio
 import inspect
 import math
 import time
+from async_boundary import _await_owned
 
 
 class LoadStopped(ValueError):
@@ -142,7 +143,7 @@ class SerialQueue:
             result = operation()
             if not inspect.isawaitable(result):
                 raise LoadStopped()
-            value = await asyncio.wait_for(result, timeout=timeout)
+            value = await _await_owned(result, timeout)
             budget.remaining()
             return value
         except asyncio.CancelledError:

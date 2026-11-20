@@ -12,6 +12,7 @@ from typing import Callable
 import httpx
 import jwt
 from provider_pager import FakeResponse, FetchStopped, ReadRequest, HOST
+from async_boundary import _await_owned as _await_request
 
 _ACCOUNT_PATH = re.compile(r'/accounts/([0-9a-f-]{36})/(details|balances|transactions)\Z')
 _SESSION_PATH = re.compile(r'/sessions/([0-9a-f-]{36})\Z')
@@ -97,31 +98,6 @@ def suppress_provider_diagnostics():
     for handler in handlers:
         if not any(isinstance(f, _NoProviderDiagnostics) for f in handler.filters):
             handler.addFilter(_NoProviderDiagnostics())
-
-
-def _retrieve_request_result(task):
-    # Also retrieve a result after repeated caller cancellation interrupts drain.
-    if not task.cancelled():
-        task.exception()
-
-
-async def _await_request(coro, seconds):
-    """Keep caller cancellation/timeout separate from transport cleanup failures.
-
-    Drain cancellation cooperatively, as wait_for already does. This is not a
-    hard wall-clock bound for a transport that refuses to finish cleanup.
-    """
-    task = asyncio.create_task(coro)
-    task.add_done_callback(_retrieve_request_result)
-    try:
-        return await asyncio.wait_for(asyncio.shield(task), timeout=seconds)
-    except (asyncio.CancelledError, asyncio.TimeoutError):
-        task.cancel()
-        try:
-            await task
-        except (Exception, asyncio.CancelledError):
-            pass
-        raise
 
 
 class ReadOnlyHTTP:
