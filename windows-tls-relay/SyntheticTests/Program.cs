@@ -92,7 +92,11 @@ internal static class Program
         await tcp.ConnectAsync(IPAddress.Loopback, port, limit.Token);
         using var tls = new SslStream(tcp.GetStream()); // No permissive validation callback.
         Console.WriteLine("STEP: client-handshake");
-        await tls.AuthenticateAsClientAsync(Options(cert, host), limit.Token);
+        try { await tls.AuthenticateAsClientAsync(Options(cert, host), limit.Token); }
+        catch (AuthenticationException) { Console.WriteLine("HANDSHAKE: authentication"); throw; }
+        catch (IOException) { Console.WriteLine("HANDSHAKE: io"); throw; }
+        catch (OperationCanceledException) { Console.WriteLine("HANDSHAKE: canceled"); throw; }
+        catch { Console.WriteLine("HANDSHAKE: other"); throw; }
         Console.WriteLine("STEP: client-write");
         await tls.WriteAsync(request, limit.Token);
         Console.WriteLine("STEP: client-response");
