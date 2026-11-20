@@ -10,7 +10,7 @@ MODULES = (
     'test_provider_session', 'test_provider_session_offsets',
     'test_provider_json_numbers', 'test_provider_load', 'test_provider_doctor',
     'test_provider_provenance', 'test_http_cancellation_cleanup',
-    'test_read_composition_cleanup', 'test_queue_cleanup',
+    'test_read_composition_cleanup', 'test_queue_cleanup', 'test_early_timeout',
     'test_checked_read_http_integration', 'test_checked_read_http_failures',
     'test_transaction_analytics', 'test_transaction_export',
     'test_transaction_recurring', 'test_money_corpus',
