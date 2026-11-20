@@ -14,9 +14,9 @@ Every operation revalidates all path components, so a symlink or junction swappe
 
 ## What is verified, and where
 
-- Linux, Python 3.10: `test_windows_private_store` 22 tests pass, no skips. The Windows-native suite has not been run on Windows.
-- Logic tests run on any OS with a fake backend. They are not DPAPI evidence.
-- `test_windows_native_store.py` defines its tests only when `os.name == 'nt'` (no skips anywhere). This PR adds no workflow, so nothing in it runs them. Real DPAPI evidence requires a native Windows run of `python -m unittest -v test_windows_private_store test_windows_native_store` and a green result on the head SHA. Even then it is a GitHub runner, not the owner's laptop or Windows version. The logic suite has not yet been run on Windows either.
+- Linux, Python 3.10: `test_windows_private_store` 22 tests pass, no skips (fake backend, logic only, not DPAPI evidence).
+- Native Windows: the `windows store tests` workflow (`.github/workflows/windows-store.yml`, windows-latest, only on PRs touching the store files) runs `python -m unittest -v test_windows_private_store test_windows_native_store`. Run 44788673175 on head 58f9f4c passed: 16 tests (9 logic with a fake backend, 7 native DPAPI), no skips, synthetic bytes only. That is real DPAPI on a GitHub runner. It is not the owner's laptop or Windows version, and it does not qualify the ACL or atomicity points below.
+- The native suite is defined only when `os.name == 'nt'`, so on other systems it contributes no tests and no skips.
 
 ## Not claimed
 
@@ -24,4 +24,4 @@ Every operation revalidates all path components, so a symlink or junction swappe
 - Not protected against processes running as the same user, against anyone with the user's Windows logon secret, or against a roaming-profile or backup restore to another account setup.
 - Python memory is not zeroized. Backup behaviour of the chosen directory is not reviewed.
 - No connection to the callback relay, signer or bank workflow. No locking: serialize writers above this module.
-- Not tested on the owner's Windows version.
+- Not tested on the owner's laptop or Windows version.
