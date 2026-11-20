@@ -1,62 +1,81 @@
 import time
+import types
 import unittest
+from unittest.mock import patch
 import httpx
+import provider_http
 from provider_http import ReadOnlyHTTP, application_jwt
 from provider_pager import ReadRequest, FetchStopped, HOST
-from signer_seam import FixedSigner, SignerSeamError
+from signer_seam import FixedSigner
 from test_signer_seam import APP, ACCOUNT, SESSION, KEY, TestStream
 
 
-class SlowBackendTests(unittest.IsolatedAsyncioTestCase):
-    def http(self, backend, seen, **kw):
+class FakeClock:
+    """Explicit monotonic clock. Nothing here sleeps or depends on real speed."""
+    def __init__(self):
+        self.now = 1000.0
+
+    def monotonic(self):
+        return self.now
+
+    def advance(self, seconds):
+        self.now += seconds
+
+
+class SignerBackendTimingTests(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.clock = FakeClock()
+        # Replace only the transport's `time` name, not the global time module, so
+        # asyncio keeps its real clock. total_seconds stays at the 5 s default.
+        fake_time = types.SimpleNamespace(monotonic=self.clock.monotonic, time=time.time)
+        patcher = patch.object(provider_http, 'time', fake_time)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.seen = []
+
+    def http(self, backend):
         def handler(request):
-            seen.append(request)
+            self.seen.append(request)
             return httpx.Response(200, headers={'content-type': 'application/json'}, stream=TestStream(b'{}'))
         return ReadOnlyHTTP(FixedSigner(backend, APP), accounts=frozenset({ACCOUNT}), session=SESSION,
-                            _test_transport=httpx.MockTransport(handler), **kw)
+                            _test_transport=httpx.MockTransport(handler))
 
     def request(self):
         return ReadRequest(HOST, f'/accounts/{ACCOUNT}/balances', ())
 
-    async def test_blocking_backend_past_budget_is_not_accepted_and_sends_nothing(self):
-        # A synchronous backend blocks the event loop; the transport must still
-        # refuse to continue once its deadline has passed.
-        seen = []
+    async def test_backend_that_overruns_budget_is_not_accepted_and_sends_nothing(self):
         def slow():
-            time.sleep(0.3)
+            self.clock.advance(10)  # well past the 5 s budget, no real waiting
             return application_jwt(APP, KEY)
-        http = self.http(slow, seen, total_seconds=0.1)
         with self.assertRaises(FetchStopped) as caught:
-            await http(self.request())
+            await self.http(slow)(self.request())
         self.assertEqual(str(caught.exception), 'time_budget')
-        self.assertEqual(seen, [])
+        self.assertEqual(self.seen, [])
 
     async def test_backend_failure_means_no_request_and_no_retry(self):
-        seen, calls = [], []
+        calls = []
         def broken():
             calls.append(1)
             raise RuntimeError('SYNTHETIC-SECRET')
-        http = self.http(broken, seen)
         with self.assertRaises(FetchStopped) as caught:
-            await http(self.request())
-        self.assertEqual(seen, [])
+            await self.http(broken)(self.request())
+        self.assertEqual(self.seen, [])
         self.assertEqual(len(calls), 1)
         self.assertNotIn('SYNTHETIC-SECRET', repr(caught.exception) + str(caught.exception))
 
-    async def test_fast_backend_still_works_after_a_slow_failure(self):
-        seen = []
+    async def test_next_call_works_after_an_overrun(self):
         state = {'slow': True}
         def backend():
             if state['slow']:
                 state['slow'] = False
-                time.sleep(0.3)
+                self.clock.advance(10)
             return application_jwt(APP, KEY)
-        http = self.http(backend, seen, total_seconds=0.1)
+        http = self.http(backend)
         with self.assertRaises(FetchStopped):
             await http(self.request())
-        out = await http(self.request())
+        out = await http(self.request())  # clock no longer advances: deterministic
         self.assertEqual(out.status, 200)
-        self.assertEqual(len(seen), 1)
+        self.assertEqual(len(self.seen), 1)
 
 
 if __name__ == '__main__':
