@@ -114,6 +114,49 @@ internal static class Program
         try { await run; } catch (RelayRejectedException e) { Check(e.Message == "Local TLS relay stopped"); return; }
         throw new Exception("Expected bounded shutdown");
     }
+    // Isolated synthetic handshake probe. No relay changes, private diagnostics
+    // or validation callback. Observe both tasks before leaving the test.
+    private static async Task ServerHandshakeProbe()
+    {
+        using var cert = Certificate();
+        using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        try
+        {
+            int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            Task server = Task.Run(async () =>
+            {
+                try
+                {
+                    using var tcp = await listener.AcceptTcpClientAsync(limit.Token);
+                    using var tls = new SslStream(tcp.GetStream());
+                    await tls.AuthenticateAsServerAsync(new SslServerAuthenticationOptions
+                    {
+                        ServerCertificate = cert,
+                        EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
+                        ClientCertificateRequired = false,
+                        ApplicationProtocols = new() { SslApplicationProtocol.Http11 },
+                        AllowRenegotiation = false
+                    }, limit.Token);
+                    Console.WriteLine("PROBE-SERVER: success");
+                }
+                catch (AuthenticationException) { Console.WriteLine("PROBE-SERVER: authentication"); throw; }
+                catch (IOException) { Console.WriteLine("PROBE-SERVER: io"); throw; }
+                catch (OperationCanceledException) { Console.WriteLine("PROBE-SERVER: canceled"); throw; }
+                catch { Console.WriteLine("PROBE-SERVER: other"); throw; }
+            });
+            Task client = Task.Run(async () =>
+            {
+                using var tcp = new TcpClient(AddressFamily.InterNetwork);
+                await tcp.ConnectAsync(IPAddress.Loopback, port, limit.Token);
+                using var tls = new SslStream(tcp.GetStream());
+                await tls.AuthenticateAsClientAsync(Options(cert), limit.Token);
+            });
+            await Task.WhenAll(server, client);
+        }
+        finally { listener.Stop(); }
+    }
     private static async Task NetworkTests()
     {
         Console.WriteLine("STEP: network-certificate");
@@ -240,6 +283,8 @@ internal static class Program
             using (var expired = Certificate(expired:true)) Reject(() => LocalTlsRelay.ValidateLeaf(expired));
             Reject(() => LocalTlsRelay.FromCurrentUserStore("invalid"));
             if (!OperatingSystem.IsWindows()) Reject(() => LocalTlsRelay.FromCurrentUserStore(new string('A',40)));
+            Console.WriteLine("PHASE: server-handshake-probe");
+            await ServerHandshakeProbe();
             Console.WriteLine("PHASE: network");
             await NetworkTests();
             Console.WriteLine("PHASE: rejection");
