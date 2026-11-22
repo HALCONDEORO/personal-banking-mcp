@@ -60,6 +60,16 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Private callback data tests failed" }
           python -O windows-tls-relay/test_callback_pipe.py
           if ($LASTEXITCODE -ne 0) { throw "Optimized private callback data tests failed" }
+      - name: Synthetic private callback ACK, normal and optimized
+        shell: pwsh
+        run: |
+          dotnet build windows-tls-relay/AckFixture -c Release --disable-build-servers
+          if ($LASTEXITCODE -ne 0) { throw "ACK fixture build failed" }
+          $env:CONTROL_TEST_DOTNET = (Get-Command dotnet -CommandType Application).Source
+          python windows-tls-relay/test_callback_ack.py
+          if ($LASTEXITCODE -ne 0) { throw "Private callback ACK tests failed" }
+          python -O windows-tls-relay/test_callback_ack.py
+          if ($LASTEXITCODE -ne 0) { throw "Optimized private callback ACK tests failed" }
       - name: Synthetic Windows key A/B, Debug and Release
         shell: pwsh
         run: |
