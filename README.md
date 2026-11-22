@@ -49,6 +49,38 @@ If activation is restricted by your computer's policy, use `.venv\Scripts\python
 
 The demo starts a real local MCP client/server session, calls all five tools and exercises requests that must fail. The data is invented. Dependencies are version-pinned in `requirements.txt`, not locked by artifact hash. See [testing](docs/TESTING.md) for the additional Node property, fuzz and end-to-end suites.
 
+## Guided demo, no bank account
+
+After the Quick start dependencies are installed, run:
+
+```sh
+python demo.py --html demo-report.html
+```
+
+This opens a real local MCP stdio session with the fixture server, lists its five
+read-only tools, calls each one and verifies that the unsupported payment tool is
+rejected. The server runs through the existing network-denying audit launcher.
+There are no bank credentials, account linking steps or live-mode switches.
+
+The terminal prints the actual responses. Open `demo-report.html` in your browser
+for the same results in a readable, offline page. The command creates a **new**
+file and refuses to overwrite an existing report; use another filename to run it
+again. Delete the report when finished. It contains only invented fixture data.
+The report has no scripts, remote assets, telemetry or HTTP listener.
+
+![Offline report generated from an actual local synthetic MCP session. Fixture date 2026-01-05, not a real balance.](demo-preview.svg)
+
+![The same local synthetic report at a 390-pixel mobile viewport. No bank connection.](demo-mobile.svg)
+
+The screenshots show the generated report, not a bank connection or a hosted
+banking dashboard. Fixture balances are fixed examples, not current account
+information. The lower sections show transactions, literal search, summaries
+and the rejected payment-tool check. To reproduce the walkthrough checks:
+
+```sh
+python -m unittest -q test_demo test_server
+```
+
 ## Five read-only tools
 
 | Tool | Arguments | What it returns |
