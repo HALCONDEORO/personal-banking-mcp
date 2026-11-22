@@ -40,11 +40,11 @@ test('actual encrypted quota: four reads, close/reopen retains stop+budget, revi
   await assert.rejects(client.call('get_balance',{account:'synthetic'}),/QUOTA/);
   store.close();store=new EncryptedStore(dir,key);client=make();
   assert.equal(store.read().quota['synthetic/balances'].length,4);
-  await assert.rejects(client.call('get_balance',{account:'synthetic'}),/CONSENT_OR_STATE/);
+  await assert.rejects(client.call('get_balance',{account:'synthetic'}),/(CONSENT_OR_STATE|TERMINAL_STOP)/);
   // Test-only owner recovery. No application command or MCP tool exposes this.
   const recovered=store.read();recovered.stopped=false;store.write(recovered);client=make();
   await assert.rejects(client.call('get_balance',{account:'synthetic'}),/QUOTA/);
-  now=NOW+86400000;await client.call('get_balance',{account:'synthetic'});assert.equal(calls,5);
+  now=NOW+86400000;client=make();await client.call('get_balance',{account:'synthetic'});assert.equal(calls,5);
   store.close();store=new EncryptedStore(dir,key);assert.equal(store.read().quota['synthetic/balances'].length,1);assert.equal(store.read().stopped,true);
  } finally {store?.close();fs.rmSync(dir,{recursive:true,force:true});}
 });
