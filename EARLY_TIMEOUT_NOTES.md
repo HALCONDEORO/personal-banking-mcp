@@ -23,3 +23,30 @@ blocks the event loop is not forcibly terminated. There is no hard wall-clock
 shutdown, memory-erasure or continuous-consent guarantee. No automatic retry,
 new tool or live activation is introduced. Rollback reverts these call sites and
 the synthetic regression module together.
+## Controlled deadline scheduling in the checked-session test
+
+A later Windows portable run at head a2a59189 failed an older test's assertion
+that exactly one transport had started within a 10ms wall-clock timeout. It
+observed zero calls, a safe refusal before the first effect. That test had not
+actually established the cancellation-suppression precondition on that run.
+The failing receipt remains a failure, not evidence to discard through a rerun.
+
+The replacement test signals actual entry into the first synthetic session
+transport before expiring a logical monotonic deadline. Only
+provider_checked_session's asyncio reference is replaced by a narrow clock
+facade; the actual event loop clock and real async_boundary implementation are
+unchanged. A scheduling wrapper retains the real owned outer task, waits for
+transport entry, advances the controlled clock past its deadline, then invokes
+the real owned-await zero-timeout path on that already-started task. The fake
+transport explicitly records that it suppressed cancellation and returned a
+response. The test requires that signal, exactly one session-check call, no
+account read, the expected two ownership boundaries and a released lock. Its
+separate 2s/5s real-time watchdogs detect a stuck test, not the behavior under
+assertion. An acquired test transport task is cancelled/joined in finally too.
+
+A second controlled case expires the logical deadline before the workflow starts
+and requires zero transport entries, one outer boundary and a released lock.
+These are distinct cases: accepting zero calls in the first case would weaken
+coverage, so its exact-one-call assertion is retained. There is no larger
+production timeout, retry, runtime fix, provider access or relaxed Windows gate.
+Native Windows normal/optimized receipts are still required independently.
