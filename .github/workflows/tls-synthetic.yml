@@ -40,6 +40,16 @@ jobs:
           dotnet-version: '10.0.x'
       - run: python -m pip install -r requirements.txt
       - run: python -m pip check
+      - name: Synthetic private child control, normal and optimized
+        shell: pwsh
+        run: |
+          dotnet build windows-tls-relay/ControlFixture -c Release --disable-build-servers
+          if ($LASTEXITCODE -ne 0) { throw "Control fixture build failed" }
+          $env:CONTROL_TEST_DOTNET = (Get-Command dotnet -CommandType Application).Source
+          python windows-tls-relay/test_relay_process.py
+          if ($LASTEXITCODE -ne 0) { throw "Private control tests failed" }
+          python -O windows-tls-relay/test_relay_process.py
+          if ($LASTEXITCODE -ne 0) { throw "Optimized private control tests failed" }
       - name: Synthetic Windows key A/B, Debug and Release
         shell: pwsh
         run: |
