@@ -72,3 +72,16 @@ test('production transport offline: success, status/redirect, cap, JSON, abort a
   await assert.rejects(aisGet('/accounts/synthetic/balances',{},'synthetic'),/TIMEOUT/);assert.equal(destroyed,true);
  } finally {globalThis.setTimeout=originalTimer;https.request=original;syncBuiltinESMExports();}
 });
+
+test('actual AES store: transient read corruption consumes same-process resume',async()=>{
+ const dir=fs.mkdtempSync(join(tmpdir(),'bankmcp-read-'));fs.chmodSync(dir,0o700);let store,calls=0;
+ try {
+  store=new EncryptedStore(dir,randomBytes(32));store.write(initial());
+  const client=new ReadClient({store,clock:()=>NOW,signer:()=> 'synthetic',transport:async()=>{calls++;return {balances:[]};}});
+  await client.call('get_balance',{account:'synthetic'});
+  const path=join(dir,'state.aesgcm'),raw=fs.readFileSync(path);fs.writeFileSync(path,Buffer.from('corrupt synthetic'));
+  await assert.rejects(client.call('get_balance',{account:'synthetic'}));
+  fs.writeFileSync(path,raw);
+  await assert.rejects(client.call('get_balance',{account:'synthetic'}));assert.equal(calls,1);assert.equal(store.read().stopped,true);
+ }finally{store?.close();fs.rmSync(dir,{recursive:true,force:true});}
+});
