@@ -1,9 +1,10 @@
 # Enable Banking redirect evidence and local TLS prototype
 
-Checked 20 November 2026. This is a synthetic prototype, not a bank connection,
+Initial source review: 20 November 2026. Evidence reconciled after PR51 on
+22 November 2026. This is a synthetic prototype, not a bank connection,
 Windows qualification, provider approval or permission to install certificates.
 No live mode, command-line relay launcher, provider API call, payment operation,
-certificate creation, trust-store write or secret export is supplied.
+production certificate creation, trust-store write or secret export is supplied.
 
 ## What the sources establish
 
@@ -34,7 +35,9 @@ a machine key or an export-enabled key. It never exports a key or modifies a
 store. The selected leaf must have a private key, current validity, validity
 span at most 31 days, explicit non-CA constraints, digital-signature usage,
 Server Authentication EKU and exactly one localhost DNS SAN with no IP SAN.
-This code path has **not** been executed against Windows certificate storage.
+This public certificate-store factory has **not** been qualified against the
+owner's Windows certificate storage. The native TLS test below uses the
+test-only constructor and synthetic certificates, not this store-selection path.
 
 The public listener/forward destination are fixed:
 
@@ -68,15 +71,23 @@ reach the backend. This is a one-request close-delimited boundary, not a general
 request-smuggling defense for a reusable proxy.
 
 Callers must close the independent Python receiver on **every** relay exit,
-including first-connection TLS failure, cancellation or malformed callback. That
-cross-process supervisor is not implemented here. No automatic retry is safe.
+including first-connection TLS failure, cancellation or malformed callback. The
+cooperative Python lifecycle helper now joins the receiver with an injected
+async runner, including cancellation and close-error tests; see
+`windows-tls-relay/SUPERVISOR_NOTES.md`. It is not a Windows process launcher,
+private IPC channel or forced-termination guarantee. No automatic retry is safe.
 
 ## Reproduce synthetic evidence
 
-Prerequisites: .NET 10 SDK and Python 3 available as `python` on Windows or
-`python3` elsewhere. No NuGet test packages, bank credentials, persistent
-certificate, administrator privileges or trust-store changes are needed by the
-harness. For SDK first-run hygiene, set `DOTNET_CLI_TELEMETRY_OPTOUT=1` and
+Prerequisites: .NET 10 SDK and Python 3 available as `python` on the disposable
+Windows CI runner or `python3` elsewhere. Windows execution is CI-only and uses
+temporary PERSISTENT named CurrentUser CNG keys; certificates are not installed
+in any certificate/trust store. Do not run the Windows harness on the owner's
+laptop. The GITHUB_ACTIONS guard prevents accidental use, not hostile execution.
+See WINDOWS_TLS_FIXTURE_NOTES.md for key lifetime and abrupt-termination limits.
+No NuGet test packages, bank credentials, administrator privileges or
+trust-store changes are needed by the harness. For SDK first-run hygiene, set
+`DOTNET_CLI_TELEMETRY_OPTOUT=1` and
 `DOTNET_GENERATE_ASPNET_CERTIFICATE=false` before invoking dotnet. Do not run
 `dotnet dev-certs https --trust` for this work.
 
@@ -85,7 +96,10 @@ dotnet run --project windows-tls-relay/SyntheticTests --disable-build-servers
 dotnet run --project windows-tls-relay/SyntheticTests -c Release --disable-build-servers
 ```
 
-The harness generates temporary self-signed certificates in memory. Its TLS
+The harness generates temporary self-signed certificates in memory. Linux RSA
+keys are ephemeral; normal Windows TLS fixtures use named persistent keys until
+all owned work is joined, certificate scopes finish, and cleanup verifies
+absence. Socket fault-injection cases use ephemeral RSA and loopback only. Its TLS
 client uses a custom in-memory trust store with normal hostname checks, not a
 permissive certificate-validation callback. This is isolated test trust, not
 browser trust. The Python join fixture starts the actual existing
@@ -94,7 +108,8 @@ state travels through a private child-process pipe and is not printed in test
 results. The test-only constructor allows ephemeral ports and shorter deadlines;
 the public factory does not expose those substitutions.
 
-Evidence for this change: Debug and Release each PASS 76 synthetic assertions on
+Historical evidence for the initial prototype: Debug and Release each PASS 76
+synthetic assertions on
 Linux (.NET SDK 10.0.404), plus the existing Python 3.12.16 suite PASS 408 tests
 both normally and with `-O`, and the existing MCP stdio demo PASS. An initial
 full-suite run with the system Python 3.10 failed because MCP dependencies were
@@ -104,17 +119,30 @@ fixed-hop rebuilding and EOF, Python receiver/state validation, hostname mismatc
 untrusted backend response, unavailable/slow backend, slow handshake/header,
 cancellation/disposal, idle expiry, one-shot restart refusal and listener closure. Parser
 and leaf-negative fixtures are additional coverage. These runs do not prove
-Windows store custody or browser acceptance, and no Windows runner result is
-claimed here.
+Windows store custody or browser acceptance.
+
+Later native evidence, PR51: on the hosted Windows runner, Debug and Release
+each PASS 75 assertions (one assertion is Linux-only), with lifecycle/socket
+fault checks and the Python success/denial joins. Each final PASS follows
+verified absence of all owned named test keys. The separate A/B probe also
+passes in both modes. The exact merge commit is
+`e8f356315da9ff71c35464d16145723d4c15614c`; its automatic main run succeeded:
+https://github.com/HALCONDEORO/personal-banking-mcp/actions/runs/44894588032
+
+This is real TLS/socket execution with synthetic keys and consent data. It
+does not test a Revolut account, call Enable Banking, qualify browser trust,
+validate laptop ACLs or prove the public store factory's certificate selection.
+The MCP remains synthetic-only. See TLS_SYNTHETIC_CI_NOTES.md.
 
 ## Gates that remain closed
 
 1. Exact Production redirect URI, localhost/127.0.0.1, certificate and port policy
    must be confirmed by authoritative provider evidence. Do not infer acceptance
    from compilation, this harness or a third-party setup guide.
-2. Independently review this implementation and the final commit. Then run the
-   same harness on Windows and qualify CurrentUser/CNG custody with synthetic
-   positive and refusal fixtures. No real key may be used as a test fixture.
+2. Preserve independent final-head review and the green native Windows harness.
+   PR51 supplies hosted-runner TLS evidence, not target-laptop qualification.
+   Still qualify the actual store-selection/signing path, intended ACLs and
+   recovery separately. No real key may be used as a test fixture.
 3. Explain the exact leaf creation/trust/removal changes and get the owner's
    approval before doing any of them. No general development CA or certificate
    warning bypass. Certificate trust is not scoped cryptographically to a port.

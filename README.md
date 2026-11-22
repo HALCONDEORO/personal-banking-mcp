@@ -90,7 +90,7 @@ On Windows, use a JSON-compatible path such as `C:/path/personal-banking-mcp/.ve
 
 The goal is a real, personal, read-only connection through Enable Banking, with signing-key custody on the operator's own computer, explicit bank consent, accounts/balances/transactions and useful bounded analysis. It should be easy to install, verify, stop and recover without exposing credentials or financial data.
 
-That is the target, not the current feature set. Windows key handling, exact Production redirect acceptance, reviewed registration, owner-completed account linking, the trusted signing/transport bridge and the live MCP read path still need evidence. No compatibility or delivery date is promised. Payments and account-changing tools stay outside scope.
+That is the target, not the current feature set. Synthetic TLS callbacks now pass on a hosted Windows runner in Debug and Release, including the Python receiver join and verified deletion of temporary named test keys. This is real local TLS with invented consent data, not a Revolut connection or a test of the owner's laptop. See [native evidence and limits](TLS_SYNTHETIC_CI_NOTES.md). Target-laptop key custody and permissions, exact Production redirect acceptance, reviewed registration, owner-completed account linking, the trusted signing/transport bridge and the live MCP read path still need evidence. No compatibility or delivery date is promised. Payments and account-changing tools stay outside scope.
 
 Read the [final goals and release gates](ROADMAP.md) for the full target, current position and what must be proved before real use.
 
