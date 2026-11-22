@@ -1,18 +1,23 @@
 # Local bridge contracts and missing implementation
 
-Design and synthetic test scope only, 20 November 2026. No Windows bridge is
-implemented or activated by this document. No executable certificate/key setup
+Design and synthetic test scope only. Updated 22 November 2026 after the isolated
+TLS, process-control, data and duplex-ACK proofs. No complete Windows banking
+bridge is activated by this document. No executable owner certificate/key setup
 is supplied. The fixture MCP does not start consent, sign tokens or read a bank.
+See [the implementation map](docs/INTEGRATION_STATE.md) for current code paths,
+exact proof boundaries and the next integration gates.
 
 ## Two different boundaries
 
 Do not call both boundaries a single working bridge:
 
-1. **Callback local hop:** a future Windows TLS relay rebuilds a narrowly framed
+1. **Callback local hop:** the isolated Windows TLS relay rebuilds a narrowly framed
    plaintext request for the same laptop's loopback admin receiver. Python
    `callback_framing.py`, `callback_receiver.py` and `admin_consent.py` provide
-   separately testable parsing, lifecycle and state checks. They do not implement
-   the Windows TLS relay or authenticate another local process.
+   separately testable parsing, lifecycle and state checks. The .NET relay and
+   hosted-runner TLS tests exist separately; the loopback hop still does not
+   authenticate another local process. Synthetic private pipe proofs do not
+   replace that runtime hop or supply a production host.
 2. **Signing-to-transport boundary:** a proposed Windows-native signer creates a
    fixed provider JWT for a trusted in-process transport. The current Python
    read transport accepts a callable returning a token string. That callable is
@@ -41,8 +46,8 @@ supply local-process authentication. A listener binding is not an ACL.
 
 A percent-encoded query can pass the framing layer and still fail consent
 validation. That is expected layering, not permission for the relay to decode,
-normalize, rewrite or forward browser headers. The future relay must parse
-its own TLS/browser input separately and rebuild only the fixed local hop.
+normalize, rewrite or forward browser headers. The .NET relay parses
+its own TLS/browser input separately and rebuilds only the fixed local hop.
 
 The current receiver requires EOF after the rebuilt request: the relay must
 half-close its sending side. A blank line alone does not complete the input.
@@ -89,8 +94,10 @@ consent-state validation using in-memory synthetic targets. It makes no socket,
 TLS, Windows, signer or provider call. Existing receiver tests use local
 synthetic loopback sockets and existing admin transport tests use MockTransport.
 The HTTP/read stack tests use the actual Python layers and injected mock HTTP.
-None of these tests compiles or executes C#, creates a key, proves target-OS
-behavior, tests real bank compatibility or changes setup/activation gates.
+Those Python suites do not compile or execute C#, create a key, prove target-OS
+behavior, test real bank compatibility or change setup/activation gates. Separate
+.NET TLS and process fixtures now supply hosted-runner evidence, as recorded in
+the implementation map; they are not owner-laptop or real-bank evidence.
 
 See [the selected callback design](LOCAL_CALLBACK_DESIGN.md),
 [Windows release gates](WINDOWS_CALLBACK_DESIGN.md), and
