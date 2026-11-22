@@ -6,6 +6,10 @@ a key, open a listener or make an API request. The released MCP remains a
 synthetic-data demo. The Windows signing bridge and real-bank activation are
 not implemented by this document.
 
+For a proposed bounded trial and renewal/storage/stop policy, see the
+[personal read-only trial plan](docs/PERSONAL_READ_TRIAL_PLAN.md). It remains a
+proposal, not execution authority or evidence that the missing bridge works.
+
 ## 1. Confirm the permitted use
 
 The provider's current Terms allow free Control Panel/API use within their
