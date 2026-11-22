@@ -55,8 +55,10 @@ The list tool reads authorized local metadata and labels it non-live. Each bank
 page costs one durable slot, reserved before network, at most four per rolling
 24 hours per approved account and endpoint. Failed pages count. Consent expiry,
 revocation, malformed state, clock rollback, store failure or a failed/ambiguous
-request fails closed. A request first writes a persistent stop latch, cleared
-only after a valid response and durable final update. A crash leaves it stopped.
+request fails closed. A request first writes a persistent stop latch, never cleared on disk. The same process may resume only after a valid response
+and a fully durable final update, including directory fsync. A failed final
+write or process restart leaves it stopped, even after a successful read.
+This conservative audit candidate therefore needs owner recovery after restart.
 There is no automatic stop/lock/quota reset or renewal operation.
 
 The transport has a ten-second total deadline and one-MiB response cap. No raw
