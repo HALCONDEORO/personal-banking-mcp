@@ -3,6 +3,9 @@ import copy
 from datetime import datetime, timezone, timedelta
 import json
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
+from async_boundary import _await_owned as real_await_owned
 from provider_session import PrivateSession
 from provider_checked_session import CheckedSessionRead, SessionReadStopped
 from provider_pager import HOST, ReadRequest, FakeResponse
@@ -74,15 +77,59 @@ class CheckedTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(SessionReadStopped):await r(request())
         self.assertEqual(len(calls),1)
     async def test_suppressed_cancellation_cannot_start_second_effect_after_deadline(self):
-        calls=[]
+        # Control ONLY this module's deadline clock, never the event loop clock.
+        ticks=[100.0];calls=[];entered=asyncio.Event();suppressed=asyncio.Event()
+        clocked_asyncio=SimpleNamespace(
+            Lock=asyncio.Lock,CancelledError=asyncio.CancelledError,
+            get_running_loop=lambda:SimpleNamespace(time=lambda:ticks[0]))
         async def fake(req):
-            calls.append(req)
-            try:await asyncio.sleep(1)
-            except asyncio.CancelledError:pass
+            calls.append(req);entered.set()
+            try:await asyncio.Future()
+            except asyncio.CancelledError:suppressed.set()
             return FakeResponse(200,json.dumps(payload()).encode())
-        r=self.fixture(transport=fake,seconds=.01)
-        with self.assertRaises(SessionReadStopped):await r(request())
-        self.assertEqual(len(calls),1)
+        boundaries=[]
+        async def schedule_owned(coro,seconds):
+            boundaries.append(seconds)
+            if len(boundaries)==1:
+                # Real owned outer task; 5s is a safety watchdog, not the test clock.
+                return await real_await_owned(coro,5)
+            if len(boundaries)==2:
+                task=asyncio.create_task(coro)
+                try:
+                    await asyncio.wait_for(entered.wait(),2)
+                    # First effect has started. Expire the logical 101.0 deadline,
+                    # then force the REAL owned-await timeout/cancellation path.
+                    ticks[0]=102.0
+                    return await real_await_owned(task,0)
+                finally:
+                    if not task.done():task.cancel()
+                    await asyncio.gather(task,return_exceptions=True)
+            return await real_await_owned(coro,5)
+        with patch('provider_checked_session.asyncio',clocked_asyncio),patch('provider_checked_session._await_owned',schedule_owned):
+            r=self.fixture(transport=fake,seconds=1)
+            with self.assertRaises(SessionReadStopped):await r(request())
+        self.assertTrue(entered.is_set());self.assertTrue(suppressed.is_set())
+        self.assertEqual([call.path for call in calls],['/sessions/'+SID])
+        self.assertEqual(len(boundaries),2)
+        self.assertFalse(r._lock.locked())
+    async def test_deadline_expired_before_workflow_has_zero_effects(self):
+        ticks=[100.0];calls=[];entered=asyncio.Event();boundaries=[]
+        clocked_asyncio=SimpleNamespace(
+            Lock=asyncio.Lock,CancelledError=asyncio.CancelledError,
+            get_running_loop=lambda:SimpleNamespace(time=lambda:ticks[0]))
+        async def fake(req):
+            calls.append(req);entered.set()
+            return FakeResponse(200,json.dumps(payload()).encode())
+        async def expire_before_start(coro,seconds):
+            boundaries.append(seconds)
+            ticks[0]=102.0
+            return await real_await_owned(coro,5)
+        with patch('provider_checked_session.asyncio',clocked_asyncio),patch('provider_checked_session._await_owned',expire_before_start):
+            r=self.fixture(transport=fake,seconds=1)
+            with self.assertRaises(SessionReadStopped):await r(request())
+        self.assertFalse(entered.is_set());self.assertEqual(calls,[])
+        self.assertEqual(len(boundaries),1)
+        self.assertFalse(r._lock.locked())
     async def test_cancellation_propagates_no_retry(self):
         entered=asyncio.Event();calls=[]
         async def fake(req):calls.append(req);entered.set();await asyncio.sleep(5)
