@@ -1,6 +1,8 @@
 # Windows laptop callback design
 
 Topology design, not a qualified owner-laptop setup or a working bank authorization flow. Later isolated implementations now include a TLS relay with native Windows synthetic tests, DPAPI storage with synthetic runner tests, and a cooperative Python lifecycle helper. None supplies the complete linking workflow or connects the MCP to a real bank. See ENABLE_BANKING_REDIRECT_TLS.md, WINDOWS_PRIVATE_STORE_NOTES.md and windows-tls-relay/SUPERVISOR_NOTES.md for their separate evidence and limits. The exact Production redirect remains unconfirmed.
+The [implementation map](docs/INTEGRATION_STATE.md) separates the current HTTP-hop
+relay from the later private data/ACK proofs, which do not replace it.
 
 ## Selected topology
 
@@ -32,7 +34,8 @@ Synthetic callback tests can use temporary non-secret fixtures. Do not create a 
 - Fixed callback path and origin, bounded request line and headers, bounded TLS handshake/read time, one-attempt lifetime. No arbitrary proxy destination.
 - Only the expected query fields reach the fixed local endpoint. State and authorization code never appear in access logs, exception output, shell history, screenshots, tool results or command arguments.
 - State is generated per attempt, checked in constant time, expires using a monotonic clock and is consumed exactly once. Denial/cancellation/expiry close the attempt. TTL is separate from bank consent duration.
-- Return constant no-store, no-referrer, restrictive-CSP HTML with no external assets. Never echo provider bodies, codes or state.
+- Return a constant no-store, no-referrer, restrictive-CSP response with no external assets.
+  The existing relay returns plain text, not an HTML setup application. Never echo provider bodies, codes or state.
 - Stop both listeners after completion or failure and verify ports are closed. Timeout after a provider POST may mean remote state exists. Do not retry blindly.
 
 ## Required verification before a real flow

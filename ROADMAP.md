@@ -36,6 +36,10 @@ Provide a short installation and verification path, a no-secret local receipt an
 
 Use focused PRs, independent review at the final remote head and green checks before merging. Test Windows-specific behavior on Windows. Synthetic tests and compilation elsewhere do not prove Windows key custody, live compatibility, security audit completion or regulatory approval.
 
+The [implementation map](docs/INTEGRATION_STATE.md) lists actual code and
+synthetic evidence for the callback, private IPC and signing boundaries. A passed
+fixture is one component, not permission to activate the next gate.
+
 ## Release gates
 
 | Gate | Evidence required | Current position |
@@ -43,6 +47,7 @@ Use focused PRs, independent review at the final remote head and green checks be
 | Synthetic MCP | Real local MCP session and negative tests over invented data | Implemented; five fixture tools |
 | Windows signer and custody | Integrated signer, target-Windows key-policy/ACL checks, identity binding, negative tests and cleanup proof | Incomplete; isolated Windows runner tests do not qualify the signer or owner laptop |
 | Synthetic TLS callback | Native Windows TLS sockets, Python receiver join, negative paths and test-key cleanup | Hosted runner Debug/Release each pass 75 assertions; cleanup precedes PASS, see TLS_SYNTHETIC_CI_NOTES.md |
+| Private callback IPC and ACK | Integrated trusted host, duplex protocol, browser-delivery/uncertain-outcome behavior, process/handle qualification | Separate control/data/ACK synthetic proofs exist; runtime relay still uses fixed unauthenticated HTTP loopback |
 | Redirect | Local TLS/callback checks and provider acceptance of exact registered URL | Provider acceptance unresolved |
 | Registration | Final visible form and explicit operator approval | Not registered by this project workflow |
 | Account linking | Owner's bank consent/SCA and each intended account explicitly linked | Owner step, not performed by software maintainers |
