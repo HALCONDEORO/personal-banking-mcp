@@ -6,5 +6,5 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
-  <ItemGroup><InternalsVisibleTo Include="SyntheticTests" /></ItemGroup>
+  <ItemGroup><InternalsVisibleTo Include="SyntheticTests" /><InternalsVisibleTo Include="DataFixture" /></ItemGroup>
 </Project>
