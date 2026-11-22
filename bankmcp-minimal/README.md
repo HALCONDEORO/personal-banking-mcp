@@ -59,6 +59,13 @@ request fails closed. A request first writes a persistent stop latch, never clea
 and a fully durable final update, including directory fsync. A failed final
 write or process restart leaves it stopped, even after a successful read.
 This conservative audit candidate therefore needs owner recovery after restart.
+Every caught read/preflight failure also sets a separate in-memory terminal latch,
+including a failure before the first network request when disk state is still
+`stopped=false`. If the disk cannot be written then, that terminal latch cannot
+survive process restart. A fresh process can read an earlier unlocked file.
+This is an explicit unresolved startup/recovery gate, not a durable first-failure
+guarantee across restart before the initial reservation. There is no production
+entry point; an owner-verified startup/recovery protocol must close that gap.
 There is no automatic stop/lock/quota reset or renewal operation.
 
 The transport has a ten-second total deadline and one-MiB response cap. No raw
