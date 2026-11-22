@@ -1,6 +1,6 @@
 # Windows laptop callback design
 
-Design only. This is not a tested Windows setup or a working bank authorization flow. Isolated Python protocol, HTTP transport and callback receiver prototypes exist with synthetic tests. They do not supply a Windows TLS relay, Windows secret storage or a complete linking workflow. The exact redirect URI is awaiting provider confirmation.
+Topology design, not a qualified owner-laptop setup or a working bank authorization flow. Later isolated implementations now include a TLS relay with native Windows synthetic tests, DPAPI storage with synthetic runner tests, and a cooperative Python lifecycle helper. None supplies the complete linking workflow or connects the MCP to a real bank. See ENABLE_BANKING_REDIRECT_TLS.md, WINDOWS_PRIVATE_STORE_NOTES.md and windows-tls-relay/SUPERVISOR_NOTES.md for their separate evidence and limits. The exact Production redirect remains unconfirmed.
 
 ## Selected topology
 
@@ -22,7 +22,7 @@ The reviewed implementation must include exact creation, use and removal steps. 
 
 ## Admin storage gate
 
-The existing Python private store is POSIX-only. It must refuse native Windows rather than silently replacing owner-only permissions with an ordinary file. Before real secrets or sessions can persist on Windows, choose and independently review a Windows-native protected storage implementation, including account binding, ACL checks, atomic replacement, failure handling, cleanup and what backups can disclose. DPAPI or Credential Manager are candidates to investigate, not implemented guarantees.
+The original private_store.py remains POSIX-only and refuses native Windows. A separate windows_private_store.py now implements current-user DPAPI with synthetic native runner evidence; see WINDOWS_PRIVATE_STORE_NOTES.md. It does not inspect or repair inherited ACLs, prevent concurrent hostile path swaps, qualify backups or connect storage to the bank workflow. Before real secrets or sessions can persist, review those limits and verify the intended target-laptop account binding, permissions, recovery and integrated lifecycle. Do not substitute an ordinary plaintext file.
 
 Synthetic callback tests can use temporary non-secret fixtures. Do not create a real application key or ask the owner to link a bank until the storage and complete workflow are ready and separately approved.
 
